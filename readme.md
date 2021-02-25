@@ -12,7 +12,7 @@ First of all, what is a pattern? Recurrent solutions for recurrent problems
 
 - bad results: Coupled classes, god classes, huge inheritance chains, tangled code, hyper fine grained O.O.P.
 
-### Arguments against design patters
+### Arguments against design patterns
 
 - weak programming languages
 
