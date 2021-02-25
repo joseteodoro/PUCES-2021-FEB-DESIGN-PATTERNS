@@ -9,13 +9,18 @@ const SQL = `INSERT INTO vouchers
 VALUES(?, ?);`;
 
 const DESTINATION = './already-used.json';
+
 const queue = 'design-patterns-frws';
 
 class Writer {
+  constructor (valid = []) {
+    this.valid = valid;
+  }
+
   append ({voucher = '', timestamp = new Date()}) {
     let records = null;
     try {
-      records = require(DESTINATION);
+      records = JSON.parse(fs.readFileSync(DESTINATION) || '[]');
     } catch (err) {
       records = [];
     }
@@ -70,6 +75,11 @@ class Writer {
   }
 
   consume (voucher, type) {
+    if (!this.valid.includes(voucher)) {
+      const msg = `Voucher ${voucher} doenst exists`;
+      console.log(msg);
+      return Promise.reject(new Error(msg));
+    }
     const timestamp = new Date();
     const used = { voucher, timestamp };
     switch (type) {
