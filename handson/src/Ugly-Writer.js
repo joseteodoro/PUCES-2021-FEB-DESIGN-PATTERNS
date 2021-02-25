@@ -71,15 +71,16 @@ class Writer {
 
   consume (voucher, type) {
     const timestamp = new Date();
+    const used = { voucher, timestamp };
     switch (type) {
       case TYPES.FILE:
-        return this.append({ voucher, timestamp });
+        return this.append(used);
 
       case TYPES.DB:
-        return this.persist({ voucher, timestamp });
+        return this.persist(used);
 
       case TYPES.QUEUE:
-        return this.publish({ voucher, timestamp });
+        return this.publish(used);
 
       case TYPES.NULL:
         // does nothing
