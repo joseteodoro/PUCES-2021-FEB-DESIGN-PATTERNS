@@ -34,4 +34,4 @@ First of all, what is a pattern? Recurrent solutions for recurrent problems
 
 ## From problems to patterns!
 
-- Ugly-writer.js (god class, confusing and tangled code)
+- Ugly-writer.js (god class, confusing and tangled code, duplication, concurrency failure)
