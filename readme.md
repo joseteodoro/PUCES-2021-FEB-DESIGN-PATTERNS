@@ -39,4 +39,5 @@ First of all, what is a pattern? Recurrent solutions for recurrent problems
 
 
 [refactoring.guru](https://refactoring.guru/)
+
 [Improving the Design of Existing Code by Martin Fowler](https://martinfowler.com/books/refactoring.html)
