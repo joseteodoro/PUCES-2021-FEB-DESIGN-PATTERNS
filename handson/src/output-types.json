@@ -1,0 +1,7 @@
+{
+  "CONSOLE": "CONSOLE",
+  "FILE": "FILE",
+  "DB": "DB",
+  "QUEUE": "QUEUE",
+  "NULL": "NULL"
+}
