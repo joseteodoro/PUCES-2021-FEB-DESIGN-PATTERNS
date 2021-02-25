@@ -1,8 +1,8 @@
 {
-  "extends": [ "standard" ],
+  "extends": [ "semistandard" ],
   "plugins": [ "json" ],
   "rules": {
-    "complexity": ["error", 5],
+    "complexity": ["error", 10],
     "eqeqeq": "error",
     "max-statements": [ "error", { "max": 15 } ],
     "comma-dangle": ["error", {

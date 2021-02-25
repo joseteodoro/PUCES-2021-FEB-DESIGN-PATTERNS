@@ -1,4 +1,4 @@
-const amqp = require('amqplib')
+const amqp = require('amqplib');
 const sqlite3 = require('sqlite3').verbose();
 const fs = require('fs');
 const TYPES = require('./output-types.json');
@@ -6,26 +6,24 @@ require('./setup-db').setup();
 
 const SQL = `INSERT INTO vouchers
 (voucher, "timestamp")
-VALUES(?, ?);`
+VALUES(?, ?);`;
 
-const DESTINATION = './already-used.json'
-const queue = 'design-patterns-frws'
+const DESTINATION = './already-used.json';
+const queue = 'design-patterns-frws';
 
 class Writer {
-
-  append ({voucher= '', timestamp= new Date()}) {
+  append ({voucher = '', timestamp = new Date()}) {
     let records = null;
     try {
-      records = require(DESTINATION)
+      records = require(DESTINATION);
+    } catch (err) {
+      records = [];
     }
-    catch (err) {
-      records = []
-    }
-    records.push({voucher, timestamp})
-    return fs.writeFileSync(DESTINATION, JSON.stringify(records))
+    records.push({voucher, timestamp});
+    return fs.writeFileSync(DESTINATION, JSON.stringify(records));
   }
 
-  persist ({voucher= '', timestamp= new Date()}) {
+  persist ({voucher = '', timestamp = new Date()}) {
     const db = new sqlite3.Database('db.sqlite');
 
     db.serialize(() => {
@@ -39,41 +37,41 @@ class Writer {
 
   combine (address) {
     if (process.env.RABBIT_PORT) {
-      return {...address, port: process.env.RABBIT_PORT }
+      return { ...address, port: process.env.RABBIT_PORT };
     }
     if (process.env.RABBIT_HOST) {
-      return {...address, hostname: process.env.RABBIT_HOST }
+      return { ...address, hostname: process.env.RABBIT_HOST };
     }
-    return address
+    return address;
   }
 
   publish (entry) {
-    const rabbitAddress = this.combine({hostname: '0.0.0.0', port: 5672})
-    const open = amqp.connect(rabbitAddress)
+    const rabbitAddress = this.combine({hostname: '0.0.0.0', port: 5672});
+    const open = amqp.connect(rabbitAddress);
     return open.then(conn => {
-        return conn.createChannel()
+      return conn.createChannel();
     })
-    .then(ch => {
+      .then(ch => {
         return ch.assertQueue(queue)
-            .then(() => {
-                return ch.sendToQueue(queue, Buffer.from(JSON.stringify(entry)))
-            })
-            .then(() => {
-                return ch.close()
-            })
-    })
-    .then(() => {
-        console.log(`Sent to ${queue}`)
-    })
-    .catch(err => {
-        console.log(`Error sending to ${queue}. ${err}`)
-        return Promise.reject(err)
-    })
+          .then(() => {
+            return ch.sendToQueue(queue, Buffer.from(JSON.stringify(entry)));
+          })
+          .then(() => {
+            return ch.close();
+          });
+      })
+      .then(() => {
+        console.log(`Sent to ${queue}`);
+      })
+      .catch(err => {
+        console.log(`Error sending to ${queue}. ${err}`);
+        return Promise.reject(err);
+      });
   }
 
-  write (voucher, type) {
+  consume (voucher, type) {
     const timestamp = new Date();
-    switch(type) {
+    switch (type) {
       case TYPES.FILE:
         return this.append({ voucher, timestamp });
 
@@ -92,7 +90,6 @@ class Writer {
         return console.log(JSON.stringify({ voucher, timestamp }));
     }
   }
-
 }
 
-module.exports = Writer
+module.exports = Writer;
