@@ -12,6 +12,14 @@ First of all, what is a pattern? Recurrent solutions for recurrent problems
 
 - bad results: Coupled classes, god classes, huge inheritance chains, tangled code, hyper fine grained O.O.P.
 
+### Arguments against design patters
+
+- weak programming languages
+
+- inefficient solutions
+
+- unjustified use
+
 ### design pattern reinforcements
 
 - good practices
@@ -21,14 +29,6 @@ First of all, what is a pattern? Recurrent solutions for recurrent problems
 - abstractions
 
 - good design choices
-
-### Arguments against design patters
-
-- weak programming languages
-
-- inefficient solutions
-
-- unjustified use
 
 ### Most known O.O.P design patterns
 
