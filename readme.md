@@ -35,3 +35,8 @@ First of all, what is a pattern? Recurrent solutions for recurrent problems
 ## From problems to patterns!
 
 - Ugly-writer.js (god class, confusing and tangled code, duplication, concurrency failure)
+
+
+
+[refactoring.guru](https://refactoring.guru/)
+[Improving the Design of Existing Code by Martin Fowler](https://martinfowler.com/books/refactoring.html)
