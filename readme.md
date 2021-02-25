@@ -1,3 +1,5 @@
+[José Teodoro da Silva](https://www.linkedin.com/in/jteodorosilva/)
+
 # Design patterns e Frameworks
 
 ## Context
