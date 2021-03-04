@@ -1,6 +1,6 @@
 const TYPES = require('../src/output-types.json');
 const Writer = require('../src/Ugly-Writer');
-const valid = require('./unused.json')
+const valid = require('./unused.json');
 
 describe('src/index suite', () => {
   describe(`consuming user's  vouchers`, () => {
