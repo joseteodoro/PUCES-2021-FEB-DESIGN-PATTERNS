@@ -19,12 +19,6 @@ First of all, what is a pattern? Recurrent solutions for recurrent problems
 [Good Design Practices](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/good-practices.md)
 
 
-
-
-
-
-
-
 ## References
 
 [refactoring.guru](https://refactoring.guru/)
