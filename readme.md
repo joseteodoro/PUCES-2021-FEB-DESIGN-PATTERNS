@@ -12,38 +12,9 @@ First of all, what is a pattern? Recurrent solutions for recurrent problems
 
 - bad results: Coupled classes, god classes, huge inheritance chains, tangled code, hyper fine grained O.O.P.
 
-### Arguments against design patterns
 
-- weak programming languages
+[About patterns](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/about-patterns.md)
 
-- inefficient solutions
-
-- unjustified use
-
-### design pattern reinforcements
-
-- good practices
-
-- design principles (SOLID, DRY, KISS, YAGNI)
-S <- Single Responsability Principe
-
-DRY <- dont repeat yourself
-
-KISS <- keep it simple
-
-reuse!
-
-- abstractions
-
-- good design choices
-
-### Most known O.O.P design patterns
-
-- creational, structural and behavioral, and others more than that
-
-## From problems to patterns!
-
-- Ugly-writer.js (god class, confusing and tangled code, duplication, concurrency failure)
 
 [Good Design Practices](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/good-practices.md)
 
