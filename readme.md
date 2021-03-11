@@ -25,6 +25,13 @@ First of all, what is a pattern? Recurrent solutions for recurrent problems
 - good practices
 
 - design principles (SOLID, DRY, KISS, YAGNI)
+S <- Single Responsability Principe
+
+DRY <- dont repeat yourself
+
+KISS <- keep it simple
+
+reuse!
 
 - abstractions
 
