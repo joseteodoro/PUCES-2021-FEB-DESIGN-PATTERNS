@@ -45,6 +45,8 @@ reuse!
 
 - Ugly-writer.js (god class, confusing and tangled code, duplication, concurrency failure)
 
+[Good Design Practices](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/good-practices.md)
+
 
 
 [refactoring.guru](https://refactoring.guru/)
