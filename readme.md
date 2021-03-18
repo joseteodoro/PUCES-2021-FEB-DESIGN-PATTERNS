@@ -12,12 +12,9 @@ First of all, what is a pattern? Recurrent solutions for recurrent problems
 
 - bad results: Coupled classes, god classes, huge inheritance chains, tangled code, hyper fine grained O.O.P.
 
-
 [About patterns](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/about-patterns.md)
 
-
 [Good Design Practices](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/good-practices.md)
-
 
 ## References
 
