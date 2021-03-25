@@ -14,7 +14,15 @@ First of all, what is a pattern? Recurrent solutions for recurrent problems
 
 [About patterns](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/about-patterns.md)
 
+
 [Good Design Practices](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/good-practices.md)
+
+
+[Design Patterns Examples](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/design-patterns.md)
+
+
+[Concurrency Examples](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/concurrency.md)
+
 
 ## References
 
