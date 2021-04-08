@@ -18,8 +18,13 @@ First of all, what is a pattern? Recurrent solutions for recurrent problems
 [Good Design Practices](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/good-practices.md)
 
 
-[Design Patterns Examples](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/design-patterns.md)
+[Design Patterns Examples by usage](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/design-patterns-by-usage.md)
 
+[Creational Design Patterns](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/creational.md)
+
+[Behavioral Design Patterns](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/behavioral.md)
+
+[Structural Design Patterns](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/structural.md)
 
 [Concurrency Examples](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/concurrency.md)
 
