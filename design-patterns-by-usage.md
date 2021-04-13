@@ -599,7 +599,7 @@ taxCart.checkOutOrder(client, items);
 - Try strategy first because its uses composition instead of inheritance.
 
 
-## Progessive rollout Patterns / Feature Flag *Toggle*
+## Progressive rollout Patterns / Feature Flag (Toggle)
 
 - Enables change between old and new behavior / feature with a click.
 
