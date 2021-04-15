@@ -598,4 +598,159 @@ taxCart.checkOutOrder(client, items);
 
 - Try strategy first because its uses composition instead of inheritance.
 
+## Structural Patterns / Adapter (Wrapper)
 
+- Allows objects with incompatible interfaces to collaborate
+
+- The adapter implements the interface of one object and wraps the other one
+
+- Promotes abstractions and promotes polymorphism;
+
+### Usage
+
+- Use the Adapter class when you want to use some existing class, but its interface
+  isn’t compatible with the rest of your code;
+
+- Reuse existent code for a new feature
+
+```java
+
+public interface Exporter<T> {
+
+   public T export();
+
+}
+
+public class OrderReport implements Exporter<XMLContent> {
+
+   public OrderExporter(Date start, Date end) {
+      this.start = start;
+      this.end = end;
+   }
+
+   public XMLContent export() {
+      List<Order> orders = this.listOrdersBetween(start, end);
+      Template template = this.loadReportTemplate();
+      return this.xmlEngine.createReport(template, orders);
+   }
+
+}
+
+public class JsonOrderReport implements Exporter<JSONContent> {
+
+   private final OrderExporter exporter;
+
+   public OrderExporter(Date start, Date end) {
+      this.exporter = new OrderExporter(start, end);
+   }
+
+   public JSONContent export() {
+      return JSONConverter.convert(this.exporter.export());
+   }
+
+}
+```
+
+- Reuse to change the contract for new or old code
+
+- Migrations and design refactoring (short lived code)!
+
+```java
+
+public interface ExporterV1<T> {
+
+   public T export();
+
+}
+
+public interface ExporterV2<T> {
+
+   public T export(Date start, Date end);
+
+}
+
+public class OrderReportV1 implements ExporterV1<XMLContent> {
+
+   public OrderExporter(Date start, Date end) {
+      this.start = start;
+      this.end = end;
+   }
+
+   public XMLContent export() {
+      List<Order> orders = this.listOrdersBetween(start, end);
+      return this.xmlEngine.createReport(orders);
+   }
+
+}
+
+// new signature using old existent code without change on the old code
+public class OrderReportV2 implements ExporterV2<XMLContent> {
+
+   public OrderExporter(Date start, Date end) {
+      this.start = start;
+      this.end = end;
+   }
+
+   public XMLContent export(Date start, Date end) {
+      return new OrderReportV1(start, end).export();
+   }
+
+}
+
+// new content using old interface to pass our new code for old libraries / old code
+public class OrderReportAdapter implements ExporterV1<XMLContent>, ExporterV2<XMLContent> {
+
+   public OrderExporter(Date start, Date end) {
+      this.start = start;
+      this.end = end;
+   }
+
+   public XMLContent export() {
+      return this.export(this.start, this.end);
+   }
+
+   public XMLContent export(Date start, Date end) {
+      return new OrderReportV1(start, end).export();
+   }
+
+}
+```
+
+- to pass existent code / instances for third party library
+
+```java
+
+// third party connection configuration
+public interface DataSourceProvider {
+   public DataSource datasource();
+}
+
+public class DataSourceAdapter implements DataSourceProvider {
+
+   private EntityManager em;
+
+   public DataSourceAdapter(DataSourceAdapter em) {
+      this.em = em;
+   }
+
+   public DataSource datasource() {
+      EntityManagerFactoryInfo info = (EntityManagerFactoryInfo) em.getEntityManagerFactory();
+      return info.getDataSource();
+   }
+
+}
+
+// passing our connection to old third library
+EntityManager myEntityManagerInstance = get from somewhere;
+new OldLibrary(new DataSourceAdapter(myEntityManagerInstance)).doSomething();
+```
+
+### Cons
+
+- The overall complexity of the code increases because you need to introduce a set of
+  new interfaces and classes. Sometimes it’s simpler just to change the service class so
+  that it matches the rest of your code;
+
+- The code is not elegant, ugly and can lead to errors;
+
+- should be short lived (short lived code and short lived tests);
