@@ -20,6 +20,8 @@ First of all, what is a pattern? Recurrent solutions for recurrent problems
 
 [Design Patterns Examples by usage](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/design-patterns-by-usage.md)
 
+[Feature Flag / Toggle](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/ff.md)
+
 [Creational Design Patterns](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/creational.md)
 
 [Behavioral Design Patterns](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/behavioral.md)
