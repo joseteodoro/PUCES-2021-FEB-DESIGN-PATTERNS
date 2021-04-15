@@ -598,6 +598,128 @@ taxCart.checkOutOrder(client, items);
 
 - Try strategy first because its uses composition instead of inheritance.
 
+- 
+
+### Template method using FP on modern languages
+
+```java
+public abstract class Request<T> {
+
+   public abstract T fn();
+
+    public ResponseEntity<T> process(Integer page, Integer limit) {
+        if (limit == null || limit <= 0)) {
+            log.error("Limit should be at least 1.");
+            return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).build();
+        }
+
+        if (page == null || page < 0) {
+            log.error("Page should be at least 0.");
+            return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).build();
+        }
+
+        try {
+            return ResponseEntity.ok(fn());
+        } catch (Exception exception) {
+            log.error(exception.getMessage(), exception);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        } finally {
+            log.info("request finished.");
+        }
+    }
+}
+
+
+public class ListOrderRequest extends Request<List<Orders>> {
+
+   public ListOrderRequest(Integer page,Integer limit) {
+      this.page = page;
+      this.limit = limit;
+   }
+
+   @Override
+   public List<Orders> fn() {
+      return orderService.list(this.page, this.limit);
+   }
+
+}
+
+public class PostOrderRequest extends Request<Void> {
+
+   private List<Orders> orders;
+
+   public PostOrderRequest(List<Orders> orders) {
+      this.orders = orders;
+   }
+
+   @Override
+   public Void fn() {
+      return orderService.persist(this.orders);
+   }
+
+}
+
+// my controllers
+public class OrderController {
+
+    @GetMapping(produces = "application/json")
+    public ResponseEntity list(Integer page,Integer limit) {
+        return new ListOrderRequest().process(page, limit);
+    }
+
+    @PostMapping(consumes = "application/json", produces = "application/json")
+    public ResponseEntity post(@RequestBody List<Orders> orders) {
+        return new PostOrderRequest().process(orders);
+    }
+}
+```
+
+- using FP
+
+```java
+public class Request {
+
+    public static <T> ResponseEntity<T> process(Integer page, Integer limit, Supplier<T> fn) {
+        if (limit == null || limit <= 0)) {
+            log.error("Limit should be at least 1.");
+            return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).build();
+        }
+
+        if (page == null || page < 0) {
+            log.error("Page should be at least 0.");
+            return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).build();
+        }
+
+        try {
+            return ResponseEntity.ok(fn.get());
+        } catch (Exception exception) {
+            log.error(exception.getMessage(), exception);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        } finally {
+            log.info("request finished.");
+        }
+    }
+
+    public static <T> ResponseEntity<T> process(Supplier<T> fn) {
+        return Request.process(0, 10, fn);
+    }
+}
+
+// my controllers
+public class OrderController {
+
+    @GetMapping(produces = "application/json")
+    public ResponseEntity list(Integer page,Integer limit) {
+        return Request.process(page, limit, () -> orderService.list(page, limit));
+    }
+
+    @PostMapping(consumes = "application/json", produces = "application/json")
+    public ResponseEntity post(@RequestBody List<Orders> orders) {
+        return Request.process(() -> orderService.persist(orders));
+    }
+}
+```
+
 ## Structural Patterns / Adapter (Wrapper)
 
 - Allows objects with incompatible interfaces to collaborate
