@@ -728,10 +728,11 @@ public class OrderController {
 
 - Promotes abstractions and promotes polymorphism;
 
+- Promotes interface seggregation;
+
 ### Usage
 
-- Use the Adapter class when you want to use some existing class, but its interface
-  isn’t compatible with the rest of your code;
+- Use the Adapter class when you want to use some existing class, but its interface isn’t compatible with the rest of your code;
 
 - Reuse existent code for a new feature
 
@@ -869,10 +870,374 @@ new OldLibrary(new DataSourceAdapter(myEntityManagerInstance)).doSomething();
 
 ### Cons
 
-- The overall complexity of the code increases because you need to introduce a set of
-  new interfaces and classes. Sometimes it’s simpler just to change the service class so
-  that it matches the rest of your code;
+- The overall complexity of the code increases because you need to introduce a set of new interfaces and classes. Sometimes it’s simpler just to change the service class so that it matches the rest of your code;
 
 - The code is not elegant, ugly and can lead to errors;
 
 - should be short lived (short lived code and short lived tests);
+
+## Structural Patterns / Decorator
+
+- lets you attach new behaviors to objects by placing these objects inside special wrapper objects that contain the behaviors.
+
+- additional behavior to extend some existent behavior (even your code or third party libraries)
+
+- compose behavior from smaller pieces
+
+#### Usage
+
+- You can't change a third-party code but need to append behaviors
+
+- You need to combine various behaviors having basic ones
+
+```java
+interface Element {
+   String evaluate();
+}
+
+class P implements Element {
+   
+   private String content;
+
+   public P (String content) {
+      this.content = content;
+   }
+
+   public String evaluate() {
+      return String.join('', '<p>', this.content, '</p>');
+   }
+}
+
+class I implements Element {
+   
+   private Element content;
+
+   public I (Element content) {
+      this.content = content;
+   }
+
+   public String evaluate() {
+      return String.join('', '<i>', this.content.evaluate(), '</i>');
+   }
+}
+
+class B implements Element {
+   
+   private Element content;
+
+   public B (Element content) {
+      this.content = content;
+   }
+
+   public String evaluate() {
+      return String.join('', '<b>', this.content.evaluate(), '</b>');
+   }
+}
+
+class EM implements Element {
+   
+   private Element content;
+
+   public EM (Element content) {
+      this.content = content;
+   }
+
+   public String evaluate() {
+      return String.join('', '<em>', this.content.evaluate(), '</em>');
+   }
+}
+
+
+
+// usage
+
+Element complex = new EM(new B(new I( new P("my paragraph"))));
+complex.evaluate().equals("<em><b><i><p>my paragraph</p></i></b></em>");
+
+Element simple = new P("my paragraph");
+e.evaluate().equals("<p>my paragraph</p>");
+
+```
+
+with DRY
+
+
+```java
+interface Element {
+   String evaluate();
+}
+
+class P implements Element {
+   
+   private String content;
+
+   public P (String content) {
+      this.content = content;
+   }
+
+   public String evaluate() {
+      return String.join('', '<p>', this.content, '</p>');
+   }
+}
+
+class ParentElement implements Element {
+
+   private String tag;
+
+   private Element content;
+
+   public ParentElement (String tag, Element content) {
+      this.tag = tag;
+      this.content = content;
+   }
+
+   public String evaluate() {
+      return String.join("",
+         "<" , this.tag, ">",
+         this.content.evaluate(),
+         "</" , this.tag, ">");
+   }
+
+}
+
+// usage
+
+Element complex = new ParentElement(
+   "em", new ParentElement(
+      "b", new ParentElement(
+         "i",
+         new P("my paragraph")
+      )
+   )
+);
+complex.evaluate().equals("<em><b><i><p>my paragraph</p></i></b></em>");
+
+complex = new ParentElement(
+   "em", new ParentElement(
+      "b",
+      new P("my paragraph")
+      )
+   )
+);
+
+complex.evaluate().equals("<em><b><p>my paragraph</p></b></em>");
+
+Element simple = new P("my paragraph");
+e.evaluate().equals("<p>my paragraph</p>");
+
+```
+
+
+#### Cons
+
+- It’s hard to implement a decorator in such a way that its behavior
+doesn’t depend on the order in the decorators stack.
+
+- The initial configuration code of layers might look pretty ugly.
+
+What if...
+
+```java
+class Element implements Supplier<T> {
+   
+   String tag;
+   Supplier<String> element;
+
+   private Element(String tag, Supplier<String> element) {
+      this.tag = tag;
+      this.element = element;
+   }
+
+   public static from(String tag, Supplier<String> element) {
+      return new Element(tag, element)
+   }
+}
+
+@FunctionalInterface
+class abstract ParentElement implements Supplier<T> {
+
+   public String get() {
+      Element element = this.evaluate();
+      return String.join("",
+         "<" , element.tag, ">", element.get(), "</" , element.tag, ">"
+      );
+   }
+
+   public abstract Element evaluate();
+}
+
+// usage
+
+String content = "my paragraph";
+Supplier<String> complex = () -> Element.from(
+   "em",
+   () -> Element.from(
+      "b",
+      () -> Element.from(
+         "i", 
+         () -> Element.from(
+            "p",
+            () -> content
+         )
+      )
+   )
+)
+
+complex.evaluate().equals("<em><b><i><p>my paragraph</p></i></b></em>");
+
+Element simple = Element.from("p", () -> content);
+e.evaluate().equals("<p>my paragraph</p>");
+
+// or
+
+Supplier<String> complex = Arrays.asList("em", "b", "i", "p").stream()
+   .reducing(() -> content, (sup, tag) -> Element.from(tag, sup));
+
+complex.evaluate().equals("<p><i><b><em>my paragraph</em></b></i></p>");
+
+// what's wrong? became reversed cause we reduce from left to right!
+
+List<String> tags = Arrays.asList("em", "b", "i", "p");
+Supplier<String> complex = Collections.reverse(tags)
+   .stream()
+   .reducing(() -> content, (sup, tag) -> Element.from(tag, sup));
+
+complex.evaluate().equals("<em><b><i><p>my paragraph</p></i></b></em>");
+
+List<String> tags = Arrays.asList("em", "b", "i", "strong", "potato", "banana", "custom", "p");
+Supplier<String> complex = Collections.reverse(tags)
+   .stream()
+   .reducing(() -> content, (sup, tag) -> Element.from(tag, sup));
+
+// does make sense code the list already reversed?
+// ["p" , "custom", "banana", "potato", "strong", "i", "b", "em"]
+
+```
+
+## Structural Patterns / Proxy
+
+- lets you provide a substitute or placeholder for another object. A proxy controls
+  access to the original object, allowing you to perform something either before or
+  after the request gets through to the original object
+
+- Lazy evaluation
+
+- cache multi level
+
+#### Usage
+
+- Expensive resource dont need to be loaded before they're really needed
+
+- Dont eager what you are not sure if will be used
+
+```java
+interface ExpensiveResource {
+   public byte [] get();
+}
+
+class ConcreteExpensiveResource implements ExpensiveResource {
+   public byte [] get() {
+      // my huge array
+   } 
+}
+
+class ProxyExpensiveResource implements ExpensiveResource {
+   public byte [] get() {
+      // load only when needed
+      return ConcreteExpensiveResoure.loadFromSomewhere();
+   } 
+}
+
+```
+
+- Access control (protection proxy). This is when you want only specific clients
+to be able to use the service object; for instance, when your objects are crucial
+parts of an operating system and clients are various launched applications (including
+malicious ones).
+
+- Local execution of a remote service (remote proxy). This is when the service object
+is located on a remote server.
+
+- Caching request results (caching proxy). This is when you need to cache results of
+client requests and manage the life cycle of this cache, especially if results are quite
+large.
+
+```java
+interface HttpService {
+   public Response get(URI uri, Headers headers);
+}
+
+class RestHttpService implements HttpService {
+   public Response get(URI uri, Headers headers) {
+      // a lot of code here ....
+      return httpClient.get(uri, headers);
+   } 
+}
+
+class ProxyHttpService implements HttpService {
+   public Response get(URI uri, Headers headers) {
+      Response response = cache.get(uri, headers);
+      if (response == null) {
+         response = new RestHttpService().get(uri, headers);
+         cache.put(uri, headers, response);
+      }
+      return response;
+   } 
+}
+
+// what about
+
+class MultiLevelCache {
+
+   public static Response get(URI uri, Headers headers, Supplier<Response> fallback) {
+      Response response = cacheInMemory.get(cacheInMemory.createkey(uri, headers));
+      if (response == null) {
+         // dont have in memory
+         response = cacheRedis.get(cacheRedis.createkey(uri, headers));
+         if (response == null) {
+            // dont have in redis
+            response = fallback();
+            cacheRedis.put(cacheRedis.put(uri, headers), response);
+         }
+         cacheInMemory.put(cacheInMemory.createkey(uri, headers), response);
+      }
+      // so can have a lot of levels here
+      return response;
+   } 
+}
+
+// old version
+
+class RestHttpService implements HttpService {
+   public Response get(URI uri, Headers headers) {
+      // a lot of code here ....
+      return httpClient.get(uri, headers);
+   } 
+}
+
+// new version using existent cache
+
+class RestHttpService implements HttpService {
+   public Response get(URI uri, Headers headers) {
+      return ProxyHttp.get(uri, headers, () -> {
+         // a lot of code here ....
+         return httpClient.get(uri, headers);
+      })      
+   }
+}
+
+// if supplier is oneliner
+
+class RestHttpService implements HttpService {
+   public Response get(URI uri, Headers headers) {
+      return ProxyHttp.get(uri, headers, () -> httpClient.get(uri, headers));
+   }
+}
+```
+
+#### Cons
+
+- The code may become more complicated since you need to introduce a lot of new classes.
+
+- The response from the service might get delayed.
+
