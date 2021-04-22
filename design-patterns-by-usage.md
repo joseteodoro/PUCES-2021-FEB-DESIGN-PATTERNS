@@ -763,7 +763,7 @@ public class JsonOrderReport implements Exporter<JSONContent> {
 
    private final OrderExporter exporter;
 
-   public OrderExporter(Date start, Date end) {
+   public JsonOrderReport(Date start, Date end) {
       this.exporter = new OrderExporter(start, end);
    }
 
@@ -794,7 +794,7 @@ public interface ExporterV2<T> {
 
 public class OrderReportV1 implements ExporterV1<XMLContent> {
 
-   public OrderExporter(Date start, Date end) {
+   public OrderReportV1(Date start, Date end) {
       this.start = start;
       this.end = end;
    }
@@ -808,11 +808,6 @@ public class OrderReportV1 implements ExporterV1<XMLContent> {
 
 // new signature using old existent code without change on the old code
 public class OrderReportV2 implements ExporterV2<XMLContent> {
-
-   public OrderExporter(Date start, Date end) {
-      this.start = start;
-      this.end = end;
-   }
 
    public XMLContent export(Date start, Date end) {
       return new OrderReportV1(start, end).export();
