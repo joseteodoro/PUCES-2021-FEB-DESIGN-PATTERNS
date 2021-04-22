@@ -1219,7 +1219,7 @@ class RestHttpService implements HttpService {
 
 class RestHttpService implements HttpService {
    public Response get(URI uri, Headers headers) {
-      return ProxyHttp.get(uri, headers, () -> {
+      return MultiLevelCache.get(uri, headers, () -> {
          // a lot of code here ....
          return httpClient.get(uri, headers);
       })      
@@ -1230,7 +1230,7 @@ class RestHttpService implements HttpService {
 
 class RestHttpService implements HttpService {
    public Response get(URI uri, Headers headers) {
-      return ProxyHttp.get(uri, headers, () -> httpClient.get(uri, headers));
+      return MultiLevelCache.get(uri, headers, () -> httpClient.get(uri, headers));
    }
 }
 ```
