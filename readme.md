@@ -12,13 +12,17 @@ First of all, what is a pattern? Recurrent solutions for recurrent problems
 
 - bad results: Coupled classes, god classes, huge inheritance chains, tangled code, hyper fine grained O.O.P.
 
-[About patterns](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/about-patterns.md)
+Let's start taking a look on good practices that reinforces the patterns!
 
 [Good Design Practices](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/good-practices.md)
 
-[Design Patterns Examples by usage](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/design-patterns-by-usage.md)
+[Concurrency Review](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/concurrency.md)
+
+[Design Patterns by usage](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/design-patterns-by-usage.md)
 
 [Feature Flag / Toggle](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/ff.md)
+
+### Patterns by reference
 
 [Creational Design Patterns](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/creational.md)
 
@@ -26,7 +30,7 @@ First of all, what is a pattern? Recurrent solutions for recurrent problems
 
 [Structural Design Patterns](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/structural.md)
 
-[Concurrency Examples](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/concurrency.md)
+
 
 
 ## References

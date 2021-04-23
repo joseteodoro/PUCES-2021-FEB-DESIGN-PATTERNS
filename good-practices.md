@@ -2,6 +2,24 @@
 
 Following the principles will lead to SOLID and design patterns;
 
+## design pattern reinforcements
+
+- good practices
+
+- design principles
+
+- SOLID
+
+- DRY
+
+- KISS
+
+- YAGNI
+
+- abstractions
+
+- good design choices
+
 ## DRY
 
 We saw that! Don't Repeat Yourself!
@@ -50,7 +68,7 @@ Related with keep what changes isolated;
 
 The bad!
 
-```
+```javascript
 class AreaCalculator {
     areaBy (shape) {
         if (shape instanceof Square)) {
@@ -70,7 +88,7 @@ class AreaCalculator {
 
 A bit better!
 
-```
+```javascript
 class AreaCalculator {
     sum (shapes = []) {
         return shapes.map(shape => shape.area()))
@@ -95,7 +113,7 @@ Related with abstraction;
 
 The bad, again!
 
-```
+```javascript
 class AreaCalculator {
     areaBy (shape) {
         if (shape instanceof Square)) {
@@ -117,7 +135,7 @@ what if you want to add a shape `line`, `triangle`, `pentagon`?
 
 Still the same, cause we add more shape elements and extend them, not the calculator
 
-```
+```javascript
 class AreaCalculator {
     sum (shapes = []) {
         return shapes.map(shape => shape.area()))
@@ -133,7 +151,7 @@ Strong typed languages check that by default, but that's about keep the contract
 Honor the contract, honor the abstraction rules!
 Exceptions, outputs, inputs, signature, keep them consistent!
 
-```
+```javascript
 class AreaCalculator {
     sum (shapes = []) {
         return shapes.map(shape => shape.area())) <---- area() always return a float
@@ -150,7 +168,7 @@ Related with SRP, an interface should be specific for something;
 
 The bad!
 
-```
+```java
 public class MouseEventDemo implements MouseListener {
 
     public void mousePressed(MouseEvent e) {
@@ -178,7 +196,7 @@ public class MouseEventDemo implements MouseListener {
 
 Bit better
 
-```
+```java
 public class MouseClickDemo implements MouseClickListener {
 
     public void mouseClicked(MouseEvent e) {
@@ -188,7 +206,7 @@ public class MouseClickDemo implements MouseClickListener {
 }
 ```
 
-```
+```java
 public class MouseMoveDemo implements MouseMoveListener {
 
     public void mouseEntered(MouseEvent e) {
@@ -210,7 +228,7 @@ Related with fine/coarse grained functions;
 
 Related with SRP;
 
-```
+```javascript
 class DbConnection {
 
     static getInstance() {
@@ -221,7 +239,7 @@ class DbConnection {
 }
 ```
 
-```
+```javascript
 class UserController {
 
     save (user) {
@@ -241,7 +259,7 @@ class ProductController {
 
 or
 
-```
+```javascript
 class ProductController {
 
     constructor(dbConnection) {
@@ -258,9 +276,9 @@ class ProductController {
 
 ## Anemic Model
 
-non anemic
+non-anemic
 
-```
+```javascript
 class User {
 
     constructor(id, name, password) {
@@ -276,9 +294,9 @@ class User {
 }
 ```
 
-anemic
+anemic model
 
-```
+```javascript
 class User {
 
     constructor(id, name, password) {
@@ -296,3 +314,18 @@ class UserController {
 
 }
 ```
+
+## Most known O.O.P design patterns
+
+- creational, structural and behavioral, and others more than that
+
+## Arguments against design patterns
+
+- weak programming languages
+
+- inefficient solutions
+
+- unjustified use
+
+But before patterns, let's take a review on concurrency to avoid those caveats with patterns
+[Concurrency Review](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/concurrency.md)
