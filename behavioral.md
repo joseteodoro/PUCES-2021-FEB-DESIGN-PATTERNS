@@ -4,58 +4,11 @@
 
 ### Strategy
 
-- Lets you define a family of algorithms, put each of them into a separate class,
-and make their objects interchangeable.
-
-#### Usage
-
-- Use the Strategy pattern when you want to use different variants
-of an algorithm within an object and be able to switch from one algorithm
-to another during runtime.
-
-- Use the Strategy when you have a lot of similar classes that
-only differ in the way they execute some behavior.
-
-- Use the pattern to isolate the business logic of a class from the implementation
-details of algorithms that may not be as important in the context of that logic.
-
-#### Cons
-
-- Clients must be aware of the differences between strategies to be
-able to select a proper one.
-
-- A lot of modern programming languages have functional type support that
-lets you implement different versions of an algorithm inside a set of
-anonymous functions. Then you could use these functions exactly as you’d have
-used the strategy objects, but without bloating your code with extra classes
-and interfaces.
+[Link](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/design-patterns-by-usage.md#behavioral-patterns--strategy)
 
 ### Template Method
 
-- Defines the skeleton of an algorithm in the superclass but lets subclasses
-override specific steps of the algorithm without changing its structure.
-
-#### Usage
-
-- Use the Template Method pattern when you want to let clients extend only
-particular steps of an algorithm, but not the whole algorithm or its structure.
-
-- Template Method is based on inheritance: it lets you alter parts of an
-algorithm by extending those parts in subclasses. Strate- gy is based on
-composition: you can alter parts of the object’s behavior by supplying it
-with different strategies that corre- spond to that behavior. Template
-Method works at the class level, so it’s static. Strategy works on the
-object level, letting you switch behaviors at runtime.
-
-- Use the pattern when you have several classes that contain almost identical
-algorithms with some minor differences. As a result, you might need to
-modify all classes when the algorithm changes.
-
-#### Cons
-
-- Template methods tend to be harder to maintain the more steps they have.
-
-- Try to use strategy because its uses composition instead of inheritance.
+[Link](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/design-patterns-by-usage.md#behavioral-patterns--template-method)
 
 ### Observer
 
@@ -102,7 +55,7 @@ layer between senders and receivers.
 
 - The code become quite flexibe with all the flexibility's problems.
 
-### Chain of Responsibility <--- CoR
+### Chain of Responsibility (CoR)
 
 - Lets you pass requests along a chain of handlers. Upon receiving a request,
 each handler decides either to process the request or to pass it to the next

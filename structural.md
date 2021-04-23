@@ -4,22 +4,7 @@
 
 ### Adapter
 
-- allows objects with incompatible interfaces to collaborate
-
-- the adapter implements the interface of one object and wraps the other one
-
-#### Usage
-
-- Use the Adapter class when you want to use some existing class, but its interface
-  isn’t compatible with the rest of your code
-
-- Migrations and design refactoring!
-
-#### Cons
-
-- The overall complexity of the code increases because you need to introduce a set of
-  new interfaces and classes. Sometimes it’s simpler just to change the service class so
-  that it matches the rest of your code.
+[Link](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/design-patterns-by-usage.md#behavioral-patterns--template-method)
 
 ### Bridge
 
@@ -59,21 +44,7 @@ In certain scenarios, you’d need to overgeneralize the component interface, ma
 
 ### Decorator
 
-- lets you attach new behaviors to objects by placing these objects inside
-  special wrapper objects that contain the behaviors.
-
-#### Usage
-
-- You can't change a third-party code but need to append behaviors
-
-- You need to combine various behaviors.
-
-#### Cons
-
-- It’s hard to implement a decorator in such a way that its behavior
-doesn’t depend on the order in the decorators stack.
-
-- The initial configuration code of layers might look pretty ugly.
+[Link](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/design-patterns-by-usage.md#behavioral-patterns--template-method)
 
 ### Facade
 
@@ -116,32 +87,4 @@ few for the clients.
 
 ### Proxy
 
-- lets you provide a substitute or placeholder for another object. A proxy controls
-  access to the original object, allowing you to perform something either before or
-  after the request gets through to the original object
-
-- Lazy evaluation
-
-#### Usage
-
-- Expensive resource dont need to be loaded before they're really needed
-
-- Dont eager what you are not sure if will be used
-
-- Access control (protection proxy). This is when you want only specific clients
-to be able to use the service object; for instance, when your objects are crucial
-parts of an operating system and clients are various launched applications (including
-malicious ones).
-
-- Local execution of a remote service (remote proxy). This is when the service object
-is located on a remote server.
-
-- Caching request results (caching proxy). This is when you need to cache results of
-client requests and manage the life cycle of this cache, especially if results are quite
-large.
-
-#### Cons
-
-- The code may become more complicated since you need to introduce a lot of new classes.
-
-- The response from the service might get delayed.
+[Link](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/design-patterns-by-usage.md#structural-patterns--proxy)

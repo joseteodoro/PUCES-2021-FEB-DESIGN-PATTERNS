@@ -2,28 +2,7 @@
 
 ### Factory method
 
-- Keep going with contracts and types (when possible)
-
-- enables extension (creating new types and reusing the same contract without
-other changes)
-
-- centralize object creation
-
-#### Usage
-
-- use the Factory Method when you don’t know beforehand the 
-exact types and dependencies of the objects your code should
-work with
-
-- Use the Factory Method when you want to provide users of your
-library or framework with a way to extend its internal components
-
-- Factory vs curried function
-
-#### Cons
-
-- CONS: The code may become more complicated since you need to introduce
-a lot of new subclasses to implement the pattern
+[Link](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/design-patterns-by-usage.md#creational-patterns--factory-method)
 
 ### Abstract Factory
 
@@ -125,31 +104,5 @@ and we can change the behavior changing the setup
 
 ### Singleton
 
-- let's code statically
+[Link](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/design-patterns-by-usage.md#creational-patterns--singleton)
 
-- lets you ensure that a class has only one instance,
-while providing a global access point to this instance
-
-- abstract factories, builders, prototypes and pools can all be
-implemented as singletons
-
-- what about concurrence?
-
-#### Usage
-
-- use the Singleton pattern when a class in your program should have
-just a single instance available to all clients; for example, a
-single database object shared by different parts of the program
-
-- use the Singleton pattern when you need stricter control over global
-variables
-
-#### Cons
-
-- violates the Single Responsibility Principle. The pattern
-solves two problems at the time
-
-- the Singleton pattern can mask bad design, for instance, when
-the components of the program know too much about each other
-
-- it may be difficult to unit test the client code
