@@ -1312,7 +1312,7 @@ bus.registry(homepage);
 
 ```
 
-What about a event bus for the entire system? We could decouple components using messages.
+What about an event bus for the entire system? We could decouple components using messages.
 
 ```java
 public class MessageBus implements Observable<K extends ObservationAware<Message>> {
