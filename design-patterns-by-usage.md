@@ -871,6 +871,133 @@ new OldLibrary(new DataSourceAdapter(myEntityManagerInstance)).doSomething();
 
 - should be short lived (short lived code and short lived tests);
 
+## Structural Patterns / Proxy
+
+- lets you provide a substitute or placeholder for another object. A proxy controls
+  access to the original object, allowing you to perform something either before or
+  after the request gets through to the original object
+
+- Lazy evaluation
+
+- cache multi level
+
+#### Usage
+
+- Expensive resource dont need to be loaded before they're really needed
+
+- Dont eager what you are not sure if will be used
+
+```java
+interface ExpensiveResource {
+   public byte [] get();
+}
+
+class ConcreteExpensiveResource implements ExpensiveResource {
+   public byte [] get() {
+      // my huge array
+   } 
+}
+
+class ProxyExpensiveResource implements ExpensiveResource {
+   public byte [] get() {
+      // load only when needed
+      return ConcreteExpensiveResoure.loadFromSomewhere();
+   } 
+}
+
+```
+
+- Access control (protection proxy). This is when you want only specific clients
+to be able to use the service object; for instance, when your objects are crucial
+parts of an operating system and clients are various launched applications (including
+malicious ones).
+
+- Local execution of a remote service (remote proxy). This is when the service object
+is located on a remote server.
+
+- Caching request results (caching proxy). This is when you need to cache results of
+client requests and manage the life cycle of this cache, especially if results are quite
+large.
+
+```java
+interface HttpService {
+   public Response get(URI uri, Headers headers);
+}
+
+class RestHttpService implements HttpService {
+   public Response get(URI uri, Headers headers) {
+      // a lot of code here ....
+      return httpClient.get(uri, headers);
+   } 
+}
+
+class ProxyHttpService implements HttpService {
+   public Response get(URI uri, Headers headers) {
+      Response response = cache.get(uri, headers);
+      if (response == null) {
+         response = new RestHttpService().get(uri, headers);
+         cache.put(uri, headers, response);
+      }
+      return response;
+   } 
+}
+
+// what about
+
+class MultiLevelCache {
+
+   public static Response get(URI uri, Headers headers, Supplier<Response> fallback) {
+      Response response = cacheInMemory.get(cacheInMemory.createkey(uri, headers));
+      if (response == null) {
+         // dont have in memory
+         response = cacheRedis.get(cacheRedis.createkey(uri, headers));
+         if (response == null) {
+            // dont have in redis
+            response = fallback();
+            cacheRedis.put(cacheRedis.put(uri, headers), response);
+         }
+         cacheInMemory.put(cacheInMemory.createkey(uri, headers), response);
+      }
+      // so can have a lot of levels here
+      return response;
+   } 
+}
+
+// old version
+
+class RestHttpService implements HttpService {
+   public Response get(URI uri, Headers headers) {
+      // a lot of code here ....
+      return httpClient.get(uri, headers);
+   } 
+}
+
+// new version using existent cache
+
+class RestHttpService implements HttpService {
+   public Response get(URI uri, Headers headers) {
+      return MultiLevelCache.get(uri, headers, () -> {
+         // a lot of code here ....
+         return httpClient.get(uri, headers);
+      })      
+   }
+}
+
+// if supplier is oneliner
+
+class RestHttpService implements HttpService {
+   public Response get(URI uri, Headers headers) {
+      return MultiLevelCache.get(uri, headers, () -> httpClient.get(uri, headers));
+   }
+}
+```
+
+#### Cons
+
+- The code may become more complicated since you need to introduce a lot of new classes.
+
+- The response from the service might get delayed.
+
 ## Structural Patterns / Decorator
 
 - lets you attach new behaviors to objects by placing these objects inside special wrapper objects that contain the behaviors.
@@ -1109,130 +1236,109 @@ Supplier<String> complex = Collections.reverse(tags)
 
 ```
 
-## Structural Patterns / Proxy
+## Behavioral Patterns / Observer
 
-- lets you provide a substitute or placeholder for another object. A proxy controls
-  access to the original object, allowing you to perform something either before or
-  after the request gets through to the original object
+- Lets you define a subscription mechanism to notify multiple objects 
+about any events that happen to the object they're observing.
 
-- Lazy evaluation
-
-- cache multi level
+- some examples, pubsub, queues, event listeners, pipes;
 
 #### Usage
 
-- Expensive resource dont need to be loaded before they're really needed
+- Use the Observer pattern when changes to the state of one object may
+require changing other objects, and the actual set of objects is unknown
+beforehand or changes dynamically.
 
-- Dont eager what you are not sure if will be used
+- Use the pattern when some objects in your app must observe others,
+but keep coupling low.
+
+- sounds like reactive programming?
 
 ```java
-interface ExpensiveResource {
-   public byte [] get();
+public interface ObservationAware<T> {
+   public onData(T t);
 }
 
-class ConcreteExpensiveResource implements ExpensiveResource {
-   public byte [] get() {
-      // my huge array
-   } 
+public interface Observable<K extends ObservationAware<T>> {
+   public registry(K k);
 }
 
-class ProxyExpensiveResource implements ExpensiveResource {
-   public byte [] get() {
-      // load only when needed
-      return ConcreteExpensiveResoure.loadFromSomewhere();
-   } 
+public class Message {
+   public String body() {}
 }
+
+public class MessageLogger implements ObservationAware<Message> {
+   public onData(Message message) {
+      System.out.println(message.body());
+   }
+}
+
+public class MessageBus implements Observable<K extends ObservationAware<Message>> {
+
+   private List<K> listeners = new LinkedList<>();
+
+   public registry(K listener) {
+      this.listeners.add(listener);
+   }
+
+   public void emit(Message message) {
+      this.listeners.forEach(l -> l.onData(message));
+   }
+
+}
+
+// usage
+
+MessageBus bus = new MessageBus();
+bus.registry(new MessageLogger());
+bus.registry(new AutoForwardMessage(newDestination));
+
+public class Page  implements ObservationAware<Message> {
+   //.....
+   public onData(Message message) {
+      this.messagePanel.add(message);
+      this.sendBrowserNotification(message);
+   }
+   //.....
+}
+
+Page homepage = new Page();
+bus.registry(homepage);
 
 ```
 
-- Access control (protection proxy). This is when you want only specific clients
-to be able to use the service object; for instance, when your objects are crucial
-parts of an operating system and clients are various launched applications (including
-malicious ones).
-
-- Local execution of a remote service (remote proxy). This is when the service object
-is located on a remote server.
-
-- Caching request results (caching proxy). This is when you need to cache results of
-client requests and manage the life cycle of this cache, especially if results are quite
-large.
+What about a event bus for the entire system?
 
 ```java
-interface HttpService {
-   public Response get(URI uri, Headers headers);
-}
+public class MessageBus implements Observable<K extends ObservationAware<Message>> {
 
-class RestHttpService implements HttpService {
-   public Response get(URI uri, Headers headers) {
-      // a lot of code here ....
-      return httpClient.get(uri, headers);
-   } 
-}
+   private static MessageBus instance = new MessageBus();
 
-class ProxyHttpService implements HttpService {
-   public Response get(URI uri, Headers headers) {
-      Response response = cache.get(uri, headers);
-      if (response == null) {
-         response = new RestHttpService().get(uri, headers);
-         cache.put(uri, headers, response);
-      }
-      return response;
-   } 
-}
-
-// what about
-
-class MultiLevelCache {
-
-   public static Response get(URI uri, Headers headers, Supplier<Response> fallback) {
-      Response response = cacheInMemory.get(cacheInMemory.createkey(uri, headers));
-      if (response == null) {
-         // dont have in memory
-         response = cacheRedis.get(cacheRedis.createkey(uri, headers));
-         if (response == null) {
-            // dont have in redis
-            response = fallback();
-            cacheRedis.put(cacheRedis.put(uri, headers), response);
-         }
-         cacheInMemory.put(cacheInMemory.createkey(uri, headers), response);
-      }
-      // so can have a lot of levels here
-      return response;
-   } 
-}
-
-// old version
-
-class RestHttpService implements HttpService {
-   public Response get(URI uri, Headers headers) {
-      // a lot of code here ....
-      return httpClient.get(uri, headers);
-   } 
-}
-
-// new version using existent cache
-
-class RestHttpService implements HttpService {
-   public Response get(URI uri, Headers headers) {
-      return MultiLevelCache.get(uri, headers, () -> {
-         // a lot of code here ....
-         return httpClient.get(uri, headers);
-      })      
+   public static MessageBus getInstance() {
+      return instance;
    }
-}
 
-// if supplier is oneliner
+   private MessageBus() { super(); }
 
-class RestHttpService implements HttpService {
-   public Response get(URI uri, Headers headers) {
-      return MultiLevelCache.get(uri, headers, () -> httpClient.get(uri, headers));
+   private List<K> listeners = new LinkedList<>();
+
+   public static void registry(K listener) {
+      instance.listeners.add(listener);
    }
+
+   public static void emit(Message message) {
+      instance.listeners.forEach(l -> l.onData(message));
+   }
+
 }
+
+// send messages from anywhere
+Message userUpdates = new Message();
+MessageBus.emit(userUpdates);
+
 ```
 
 #### Cons
 
-- The code may become more complicated since you need to introduce a lot of new classes.
-
-- The response from the service might get delayed.
-
+- hard to debug! Subscribers can be notified in random order. 
+(and can be more complex if you are using in concurrent environment).

@@ -12,22 +12,7 @@
 
 ### Observer
 
-- Lets you define a subscription mechanism to notify multiple objects 
-about any events that happen to the object they're observing.
-
-#### Usage
-
-- Use the Observer pattern when changes to the state of one object may
-require changing other objects, and the actual set of objects is unknown
-beforehand or changes dynamically.
-
-- Use the pattern when some objects in your app must observe others,
-but keep coupling low.
-
-#### Cons
-
-- hard to debug! Subscribers can be notified in random order. 
-(and can be more complex if you are using in concurrent environment).
+[Link](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/design-patterns-by-usage.md#behavioral-patterns--observer)
 
 ### Command
 
