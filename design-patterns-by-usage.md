@@ -1263,8 +1263,13 @@ public interface Observable<K extends ObservationAware<T>> {
    public registry(K k);
 }
 
+
 public class Message {
+
+   public String eventType() {}
+
    public String body() {}
+
 }
 
 public class MessageLogger implements ObservationAware<Message> {
@@ -1307,7 +1312,7 @@ bus.registry(homepage);
 
 ```
 
-What about a event bus for the entire system?
+What about a event bus for the entire system? We could decouple components using messages.
 
 ```java
 public class MessageBus implements Observable<K extends ObservationAware<Message>> {
@@ -1320,25 +1325,41 @@ public class MessageBus implements Observable<K extends ObservationAware<Message
 
    private MessageBus() { super(); }
 
-   private List<K> listeners = new LinkedList<>();
+   private Map<K, List<ObservationAware<Message>>> listeners = new HashMap<>();
 
-   public static void registry(K listener) {
-      instance.listeners.add(listener);
+   public static void registry(K listener, String event) {
+      if (instance.listeners.get(event) == null) {
+         instance.listeners.put(event, new LinkedList<>());
+      }
+      instance.listeners
+         .get(event)
+         .add(listener);
    }
 
    public static void emit(Message message) {
-      instance.listeners.forEach(l -> l.onData(message));
+      instance.listeners
+         .get(message.eventType())
+         .forEach(l -> l.onData(message));
    }
 
 }
+
+// push notifications anywhere
+Page userPage = new UserPage();
+MessageBus.registry(userPage, "create:user");
 
 // send messages from anywhere
 Message userUpdates = new Message();
 MessageBus.emit(userUpdates);
 
+// everytime we create a user, userpage will be notified
+
+// everyone listening message bus can receive them
 ```
 
 #### Cons
 
 - hard to debug! Subscribers can be notified in random order. 
 (and can be more complex if you are using in concurrent environment).
+
+- increase system's complexity
