@@ -998,6 +998,135 @@ class RestHttpService implements HttpService {
 
 - The response from the service might get delayed.
 
+
+## Behavioral Patterns / Observer
+
+- Lets you define a subscription mechanism to notify multiple objects 
+about any events that happen to the object they're observing.
+
+- some examples, pubsub, topics, event listeners, pipes;
+
+#### Usage
+
+- Use the Observer pattern when changes to the state of one object may
+require changing other objects, and the actual set of objects is unknown
+beforehand or changes dynamically.
+
+- Use the pattern when some objects in your app must observe others,
+but keep coupling low.
+
+- sounds like reactive programming?
+
+```java
+public interface ObservationAware<T> {
+   public onData(T t);
+}
+
+public interface Observable<K extends ObservationAware<T>> {
+   public registry(K k);
+}
+
+
+public class Message {
+
+   public String eventType() {}
+
+   public String body() {}
+
+}
+
+public class MessageLogger implements ObservationAware<Message> {
+   public onData(Message message) {
+      System.out.println(message.body());
+   }
+}
+
+public class MessageBus implements Observable<K extends ObservationAware<Message>> {
+
+   private List<K> listeners = new LinkedList<>();
+
+   public registry(K listener) {
+      this.listeners.add(listener);
+   }
+
+   public void emit(Message message) {
+      this.listeners.forEach(l -> l.onData(message));
+   }
+
+}
+
+// usage
+
+MessageBus bus = new MessageBus();
+bus.registry(new MessageLogger());
+bus.registry(new AutoForwardMessage(newDestination));
+
+public class Page  implements ObservationAware<Message> {
+   //.....
+   public onData(Message message) {
+      this.messagePanel.add(message);
+      this.sendBrowserNotification(message);
+   }
+   //.....
+}
+
+Page homepage = new Page();
+bus.registry(homepage);
+
+```
+
+What about an event bus for the entire system? We could decouple components using messages.
+
+```java
+public class MessageBus implements Observable<K extends ObservationAware<Message>> {
+
+   private static MessageBus instance = new MessageBus();
+
+   public static MessageBus getInstance() {
+      return instance;
+   }
+
+   private MessageBus() { super(); }
+
+   private Map<K, List<ObservationAware<Message>>> listeners = new HashMap<>();
+
+   public static void registry(K listener, String event) {
+      if (instance.listeners.get(event) == null) {
+         instance.listeners.put(event, new LinkedList<>());
+      }
+      instance.listeners
+         .get(event)
+         .add(listener);
+   }
+
+   public static void emit(Message message) {
+      instance.listeners
+         .get(message.eventType())
+         .forEach(l -> l.onData(message));
+   }
+
+}
+
+// push notifications anywhere
+Page userPage = new UserPage();
+MessageBus.registry(userPage, "create:user");
+
+// send messages from anywhere
+Message userUpdates = new Message();
+MessageBus.emit(userUpdates);
+
+// everytime we create a user, userpage will be notified
+
+// everyone listening message bus can receive them
+```
+
+#### Cons
+
+- hard to debug! Subscribers can be notified in random order. 
+(and can be more complex if you are using in concurrent environment).
+
+- increase system's complexity
+
 ## Structural Patterns / Decorator
 
 - lets you attach new behaviors to objects by placing these objects inside special wrapper objects that contain the behaviors.
@@ -1235,131 +1364,3 @@ Supplier<String> complex = Collections.reverse(tags)
 // ["p" , "custom", "banana", "potato", "strong", "i", "b", "em"]
 
 ```
-
-## Behavioral Patterns / Observer
-
-- Lets you define a subscription mechanism to notify multiple objects 
-about any events that happen to the object they're observing.
-
-- some examples, pubsub, queues, event listeners, pipes;
-
-#### Usage
-
-- Use the Observer pattern when changes to the state of one object may
-require changing other objects, and the actual set of objects is unknown
-beforehand or changes dynamically.
-
-- Use the pattern when some objects in your app must observe others,
-but keep coupling low.
-
-- sounds like reactive programming?
-
-```java
-public interface ObservationAware<T> {
-   public onData(T t);
-}
-
-public interface Observable<K extends ObservationAware<T>> {
-   public registry(K k);
-}
-
-
-public class Message {
-
-   public String eventType() {}
-
-   public String body() {}
-
-}
-
-public class MessageLogger implements ObservationAware<Message> {
-   public onData(Message message) {
-      System.out.println(message.body());
-   }
-}
-
-public class MessageBus implements Observable<K extends ObservationAware<Message>> {
-
-   private List<K> listeners = new LinkedList<>();
-
-   public registry(K listener) {
-      this.listeners.add(listener);
-   }
-
-   public void emit(Message message) {
-      this.listeners.forEach(l -> l.onData(message));
-   }
-
-}
-
-// usage
-
-MessageBus bus = new MessageBus();
-bus.registry(new MessageLogger());
-bus.registry(new AutoForwardMessage(newDestination));
-
-public class Page  implements ObservationAware<Message> {
-   //.....
-   public onData(Message message) {
-      this.messagePanel.add(message);
-      this.sendBrowserNotification(message);
-   }
-   //.....
-}
-
-Page homepage = new Page();
-bus.registry(homepage);
-
-```
-
-What about an event bus for the entire system? We could decouple components using messages.
-
-```java
-public class MessageBus implements Observable<K extends ObservationAware<Message>> {
-
-   private static MessageBus instance = new MessageBus();
-
-   public static MessageBus getInstance() {
-      return instance;
-   }
-
-   private MessageBus() { super(); }
-
-   private Map<K, List<ObservationAware<Message>>> listeners = new HashMap<>();
-
-   public static void registry(K listener, String event) {
-      if (instance.listeners.get(event) == null) {
-         instance.listeners.put(event, new LinkedList<>());
-      }
-      instance.listeners
-         .get(event)
-         .add(listener);
-   }
-
-   public static void emit(Message message) {
-      instance.listeners
-         .get(message.eventType())
-         .forEach(l -> l.onData(message));
-   }
-
-}
-
-// push notifications anywhere
-Page userPage = new UserPage();
-MessageBus.registry(userPage, "create:user");
-
-// send messages from anywhere
-Message userUpdates = new Message();
-MessageBus.emit(userUpdates);
-
-// everytime we create a user, userpage will be notified
-
-// everyone listening message bus can receive them
-```
-
-#### Cons
-
-- hard to debug! Subscribers can be notified in random order. 
-(and can be more complex if you are using in concurrent environment).
-
-- increase system's complexity
