@@ -12,13 +12,13 @@ First of all, what is a pattern? Recurrent solutions for recurrent problems
 
 - bad results: Coupled classes, god classes, huge inheritance chains, tangled code, hyper fine grained O.O.P.
 
-Let's start taking a look on good practices that reinforces the patterns:
-
-[Good Design Practices](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/good-practices.md)
-
 Some concurrency review to avoid patterns caveats:
 
 [Concurrency Review](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/concurrency.md)
+
+Let's start taking a look on good practices that reinforces the patterns:
+
+[Good Design Practices](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/good-practices.md)
 
 Now, let's take a look on patterns by usage (from commonly-used to less commonly-used):
 
