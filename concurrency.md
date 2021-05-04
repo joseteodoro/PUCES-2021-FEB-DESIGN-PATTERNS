@@ -6,11 +6,19 @@
 
 - concurrency and paralellism due many CPUs
 
-- deadlocks and race conditions
+- deadlocks
 
-- immutable > mutable
+[dead-lock]: https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/raw/main/images/deadlock-car.jpeg "cars deadlock"
 
-- stateless > stateful
+- race conditions
+
+[race-condition]: https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/raw/main/images/race-condition.png "race condition"
+
+- shared state increase complexity and errors:
+
+    - immutable > mutable
+
+    - stateless > stateful
 
 - we dont know when concurrency tasks will run, but we
 can ensure the order
