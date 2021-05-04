@@ -18,8 +18,6 @@ Following the principles will lead to SOLID and design patterns;
 
 - abstractions
 
-- good design choices
-
 ## DRY
 
 We saw that! Don't Repeat Yourself!
@@ -28,7 +26,9 @@ We saw that! Don't Repeat Yourself!
 
 We saw that! Keep It Simple!
 
-## Encapsulate what varies
+## design principles
+
+### Encapsulate what varies
 
 Related with same grain code;
 
@@ -38,7 +38,7 @@ Promotes polymorphism;
 
 Minimize bug from future changes;
 
-## Code for contracts (interfaces, abstract types, traits) not implementations
+### Code for contracts (interfaces, abstract types, traits) not implementations
 
 Abstractions enables substitution and polymorphism;
 
@@ -46,7 +46,7 @@ Abstractions enables keep changes isolated;
 
 Abstraction needs encapsulation;
 
-## Composition over inheritance
+### Composition over inheritance
 
 Potentialize reuse;
 
@@ -54,9 +54,9 @@ Reduce coupled connections;
 
 Related with single responsability principle;
 
-# SOLID
+## SOLID
 
-## SRP - single responsability principle:
+### SRP - single responsability principle:
 
 An artifact does one and only one thing;
 
@@ -97,7 +97,7 @@ class AreaCalculator {
 }
 ```
 
-## Open closed Principle:
+### Open closed Principle:
 
 Open to extension, but closed to changes;
 
@@ -144,7 +144,7 @@ class AreaCalculator {
 }
 ```
 
-## Liskov Substitution Principle:
+### Liskov Substitution Principle:
 
 Strong typed languages check that by default, but that's about keep the contract when abstracting something;
 
@@ -162,7 +162,7 @@ class AreaCalculator {
 
 Keep the contract!
 
-## ISP - Interface Segregation Principle:
+### ISP - Interface Segregation Principle:
 
 Related with SRP, an interface should be specific for something;
 
@@ -220,7 +220,7 @@ public class MouseMoveDemo implements MouseMoveListener {
 }
 ```
 
-## Dependency Inversion Principle:
+### Dependency Inversion Principle:
 
 Related with encapsulation and abstractions;
 
@@ -274,7 +274,7 @@ class ProductController {
 
 ```
 
-## Anemic Model
+### Anemic Model
 
 non-anemic
 
@@ -315,10 +315,6 @@ class UserController {
 }
 ```
 
-## Most known O.O.P design patterns
-
-- creational, structural and behavioral, and others more than that
-
 ## Arguments against design patterns
 
 - weak programming languages
@@ -327,5 +323,9 @@ class UserController {
 
 - unjustified use
 
-But before patterns, let's take a review on concurrency to avoid those caveats with patterns
-[Concurrency Review](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/concurrency.md)
+## Most known O.O.P design patterns
+
+- creational, structural and behavioral, and others more than that.
+
+
+[What's next](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/design-patterns-by-usage.md)

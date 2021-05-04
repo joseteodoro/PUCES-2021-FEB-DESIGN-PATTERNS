@@ -24,10 +24,6 @@ Now, let's take a look on patterns by usage (from commonly-used to less commonly
 
 [Design Patterns by usage](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/design-patterns-by-usage.md)
 
-A patter to help with progressive rollouts with no downtime:
-
-[Feature Flag / Toggle](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/ff.md)
-
 ### Patterns by categories
 
 [Creational Design Patterns](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/creational.md)
@@ -36,7 +32,9 @@ A patter to help with progressive rollouts with no downtime:
 
 [Structural Design Patterns](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/structural.md)
 
+A pattern to help with progressive rollouts with no downtime:
 
+[Feature Flag / Toggle](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/ff.md)
 
 
 ## References

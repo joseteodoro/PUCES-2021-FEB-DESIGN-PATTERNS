@@ -74,3 +74,6 @@ concurrent way
 - imperative -> think linearly
 
 - concurrent -> think reactively
+
+
+[What's next](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/good-practices.md)
