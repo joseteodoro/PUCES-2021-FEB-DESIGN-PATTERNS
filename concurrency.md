@@ -2,9 +2,15 @@
 
 - concurrency vs paralellism
 
+[concurrency]: https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/raw/main/images/concurrent-vs-parallel.jpeg "concurrency vs parallelism"
+
 - Many CPUs due physic limitations
 
-- concurrency and paralellism due many CPUs
+    - more than one CPU for each processor
+
+    - hyper threads using same CPU
+
+- concurrency and paralellism due many CPUs / HT
 
 - deadlocks
 
