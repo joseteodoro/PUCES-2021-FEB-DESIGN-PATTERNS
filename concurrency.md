@@ -2,7 +2,9 @@
 
 - Many CPUs due physic limitations
 
+
 [cpu-transistors]: https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/raw/main/images/transistor-count.jpeg "transistors"
+
 
 - more than one CPU for each processor: 2002, Intel released a Pentium 4 with hyper-threading, the first modern desktop processor to implement simultaneous multithreading (SMT).
 
@@ -10,15 +12,21 @@
 
 - concurrency vs paralellism
 
+
 [concurrency]: https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/raw/main/images/concurrent-vs-parallel.jpeg "concurrency vs parallelism"
+
 
 - deadlocks
 
+
 [dead-lock]: https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/raw/main/images/deadlock-car.jpeg "cars deadlock"
+
 
 - race conditions
 
+
 [race-condition]: https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/raw/main/images/race-condition.png "race condition"
+
 
 - shared state increase complexity and errors
 
