@@ -1447,6 +1447,8 @@ e.evaluate().equals("<p>my paragraph</p>");
 
 - In certain scenarios, you’d need to overgeneralize the component interface, making it harder to comprehend;
 
+- can mess your type hierarchy;
+
 - The code of layers might look pretty ugly;
 
 What if...
