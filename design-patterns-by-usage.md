@@ -1127,19 +1127,181 @@ MessageBus.emit(userUpdates);
 
 - increase system's complexity
 
-## Structural Patterns / Decorator
+## Structural Patterns / Decorator (for behavior)
 
-- lets you attach new behaviors to objects by placing these objects inside special wrapper objects that contain the behaviors.
+- lets you attach new behaviors to objects by placing these objects inside special wrapper objects that contain the behaviors;
 
-- additional behavior to extend some existent behavior (even your code or third party libraries)
+- additional behavior to extend some existent behavior (even your code or third party libraries);
 
-- compose behavior from smaller pieces
+- compose behavior from smaller pieces;
+
+- opposite to `Structural Patterns / Composite`, the signature does not need to build a hierarchy!
 
 #### Usage
 
 - You can't change a third-party code but need to append behaviors
 
 - You need to combine various behaviors having basic ones
+
+```java
+//third party class
+class UserStore {
+
+   public User save(User user) {};
+
+   public User load(Long id) {};
+
+   public Set<User> find(Predicate query) {};
+}
+
+// now we need to cache values, log load calls to improve debug and notify user changes
+
+// my decorator class to cache (proxy feelings!)
+class CacheableUserStore extends UserStore {
+
+   private Cache<User> cache = new Cache<>();
+
+   private UserStore delegate;
+
+   public CacheableUserStore (UserStore delegate) {
+      this.delegate = delegate;
+   }
+
+   public User save(User user) {
+      User saved = this.delegate.save(user);
+      this.cache.clearCacheFor(user);
+      return saved;
+   }
+
+   public User load(Long id) {
+      return cache.hasOne(id)
+         ? cache.getOne(id)
+         : cache.putOneAndReturn(id, this.gelegate.load(id));
+   }
+
+   public Set<User> find(Query query) {
+      return cache.hasMany(id)
+         ? cache.getMany(id)
+         : cache.putManyAndReturn(id, this.gelegate.find(query));
+   }
+}
+
+// my interface to notify (Observer feelings!)
+
+interface Observable<T> {
+
+   void registry(EventListener<T> listener) {};
+
+   void notify(T event) {};
+
+}
+
+// my decorator class to notify
+class NofifierUserStore extends UserStore implements Observable {
+
+   private UserStore delegate;
+
+   private Observable<User> observer;
+
+   public NofifierUserStore (UserStore delegate, Observable<User> observer) {
+      this.delegate = delegate;
+      this.observer = observer;
+   }
+
+   // observer feelings!
+   void registry(EventListener<User> listener) {
+      this.observer.registry(listener);
+   };
+
+   void notify(User event) {
+      this.observer.notify(event);
+   };
+
+   // decorator feelings!
+   public User save(User user) {
+      User saved = this.delegate.save(user);
+      this.notify(saved);
+      return saved;
+   }
+
+}
+
+// my decorator class to log
+class LoggerUserStore extends UserStore {
+
+   private UserStore delegate;
+
+   private Logger log = new Logger();
+
+   public LoggerUserStore (UserStore delegate) {
+      this.delegate = delegate;
+   }
+
+   public User save(User user) {
+      logger.info("saving", user);
+      return this.delegate.save(user);
+   }
+
+   public User load(Long id) {
+      logger.info("loading user id", id);
+      return this.delegate.load(query);
+   }
+
+   public Set<User> find(Query query) {
+      logger.info("looking for users", query);
+      return this.delegate.find(query);
+   }
+
+}
+
+// usage
+
+//use raw behavior
+UserStore store = new UserStore();
+
+store.save(myUser); // saves only
+User userById = store.load(userId); // load only
+
+
+//use composed behaviors (does order matter?)
+Observer<User> userObserver = SingletonObserver.for(User.class);
+UserStore store = new LoggerUserStore( 
+   new NofifierUserStore( new CacheableUserStore ( new UserStore() ), userObserver) 
+);
+
+store.save(myUser); // log, save, invalidate cache and send a user change event!
+User userById = store.load(userId); // log, load if cache misses otherwise only get from cache!
+```
+
+About above ordering:
+
+- log, save, invalidate cache?
+
+- save, invalidate cache, log?
+
+- invalidate cache, save, log?
+
+- Sometimes the ordering matters.
+
+#### Cons
+
+- It’s hard to implement a decorator in such a way that its behavior
+doesn’t depend on the order in the decorators stack.
+
+- The initial configuration code of layers might look pretty ugly.
+
+## Structural Patterns / Composite (for data and behavior)
+
+- lets you compose objects into tree structures and then work with these
+  structures as if they were individual objects
+
+### Usage
+
+- Using the Composite pattern makes sense only when the core model of your app can be represented as a tree.
+
+- Use the pattern when you want the client code to treat both simple and complex elements uniformly (data and not only behavior).
+
+- Usually the order does not matter (with some exceptions).
 
 ```java
 interface Element {
@@ -1198,8 +1360,6 @@ class EM implements Element {
    }
 }
 
-
-
 // usage
 
 Element complex = new EM(new B(new I( new P("my paragraph"))));
@@ -1227,7 +1387,10 @@ class P implements Element {
    }
 
    public String evaluate() {
-      return String.join('', '<p>', this.content, '</p>');
+      return String.join('',
+         '<p>',
+         this.content,
+         '</p>');
    }
 }
 
@@ -1278,18 +1441,18 @@ e.evaluate().equals("<p>my paragraph</p>");
 
 ```
 
+### Cons
 
-#### Cons
+- It might be difficult to provide a common interface for classes whose functionality differs too much;
 
-- It’s hard to implement a decorator in such a way that its behavior
-doesn’t depend on the order in the decorators stack.
+- In certain scenarios, you’d need to overgeneralize the component interface, making it harder to comprehend;
 
-- The initial configuration code of layers might look pretty ugly.
+- The code of layers might look pretty ugly;
 
 What if...
 
 ```java
-class Element implements Supplier<T> {
+class Element implements Supplier<String> {
    
    String tag;
    Supplier<String> element;
@@ -1299,27 +1462,21 @@ class Element implements Supplier<T> {
       this.element = element;
    }
 
-   public static from(String tag, Supplier<String> element) {
-      return new Element(tag, element)
-   }
-}
-
-@FunctionalInterface
-class abstract ParentElement implements Supplier<T> {
-
    public String get() {
-      Element element = this.evaluate();
       return String.join("",
          "<" , element.tag, ">", element.get(), "</" , element.tag, ">"
       );
    }
 
-   public abstract Element evaluate();
+   public static from(String tag, Supplier<String> element) {
+      return new Element(tag, element)
+   }
 }
 
 // usage
 
 String content = "my paragraph";
+
 Supplier<String> complex = () -> Element.from(
    "em",
    () -> Element.from(
@@ -1334,17 +1491,17 @@ Supplier<String> complex = () -> Element.from(
    )
 )
 
-complex.evaluate().equals("<em><b><i><p>my paragraph</p></i></b></em>");
+complex.get().equals("<em><b><i><p>my paragraph</p></i></b></em>");
 
 Element simple = Element.from("p", () -> content);
-e.evaluate().equals("<p>my paragraph</p>");
+e.get().equals("<p>my paragraph</p>");
 
 // or
 
 Supplier<String> complex = Arrays.asList("em", "b", "i", "p").stream()
    .reducing(() -> content, (sup, tag) -> Element.from(tag, sup));
 
-complex.evaluate().equals("<p><i><b><em>my paragraph</em></b></i></p>");
+complex.get().equals("<p><i><b><em>my paragraph</em></b></i></p>");
 
 // what's wrong? became reversed cause we reduce from left to right!
 
@@ -1353,7 +1510,7 @@ Supplier<String> complex = Collections.reverse(tags)
    .stream()
    .reducing(() -> content, (sup, tag) -> Element.from(tag, sup));
 
-complex.evaluate().equals("<em><b><i><p>my paragraph</p></i></b></em>");
+complex.get().equals("<em><b><i><p>my paragraph</p></i></b></em>");
 
 List<String> tags = Arrays.asList("em", "b", "i", "strong", "potato", "banana", "custom", "p");
 Supplier<String> complex = Collections.reverse(tags)
@@ -1364,3 +1521,14 @@ Supplier<String> complex = Collections.reverse(tags)
 // ["p" , "custom", "banana", "potato", "strong", "i", "b", "em"]
 
 ```
+
+## Adapter vs Decorator vs Composite
+
+- Adapter: adapts code to **mimic** other code using the same signature:
+   - short lived (refactoring, reuse existent bad code, version adaptation before rebuild, glue third party libs)
+
+- Decorator: **adds behavior** for existent code with no changes on that.
+   - long lived (add composite behavior, add features / requirements on third party libs)
+
+- Composite: **organize data / behavior** like a tree.
+   - long lived
