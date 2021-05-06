@@ -28,23 +28,11 @@
 
 ### Composite
 
-- lets you compose objects into tree structures and then work with these
-  structures as if they were individual objects
-
-#### Usage
-
-- Using the Composite pattern makes sense only when the core model of your app can be represented as a tree.
-
-- Use the pattern when you want the client code to treat both simple and complex elements uniformly.
-
-#### Cons
-
-- It might be difficult to provide a common interface for classes whose functionality differs too much.
-In certain scenarios, you’d need to overgeneralize the component interface, making it harder to comprehend.
+[Link](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/design-patterns-by-usage.md#structural-patterns--composite-for-data-and-behavior)
 
 ### Decorator
 
-[Link](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/design-patterns-by-usage.md#behavioral-patterns--template-method)
+[Link](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/design-patterns-by-usage.md#structural-patterns--composite-for-data-and-behavior)
 
 ### Facade
 

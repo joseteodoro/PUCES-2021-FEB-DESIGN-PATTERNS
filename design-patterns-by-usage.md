@@ -1530,7 +1530,7 @@ Supplier<String> complex = Collections.reverse(tags)
    - short lived (refactoring, reuse existent bad code, version adaptation before rebuild, glue third party libs)
 
 - Decorator: **adds behavior** for existent code with no changes on that.
-   - long lived (add composite behavior, add features / requirements on third party libs)
+   - long lived (compose behavior, add features / requirements on third party libs)
 
 - Composite: **organize data / behavior** like a tree.
    - long lived
