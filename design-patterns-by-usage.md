@@ -1145,25 +1145,25 @@ MessageBus.emit(userUpdates);
 
 ```java
 //third party class
-class UserStore {
+class UserService {
 
    public User save(User user) {};
 
    public User load(Long id) {};
 
-   public Set<User> find(Predicate query) {};
+   public Set<User> find(Query query) {};
 }
 
 // now we need to cache values, log load calls to improve debug and notify user changes
 
 // my decorator class to cache (proxy feelings!)
-class CacheableUserStore extends UserStore {
+class CacheableUserService extends UserService {
 
    private Cache<User> cache = new Cache<>();
 
-   private UserStore delegate;
+   private UserService delegate;
 
-   public CacheableUserStore (UserStore delegate) {
+   public CacheableUserService (UserService delegate) {
       this.delegate = delegate;
    }
 
@@ -1176,13 +1176,13 @@ class CacheableUserStore extends UserStore {
    public User load(Long id) {
       return cache.hasOne(id)
          ? cache.getOne(id)
-         : cache.putOneAndReturn(id, this.gelegate.load(id));
+         : cache.putOneAndReturn(id, this.delegate.load(id));
    }
 
    public Set<User> find(Query query) {
       return cache.hasMany(id)
          ? cache.getMany(id)
-         : cache.putManyAndReturn(id, this.gelegate.find(query));
+         : cache.putManyAndReturn(query, this.delegate.find(query));
    }
 }
 
@@ -1197,13 +1197,13 @@ interface Observable<T> {
 }
 
 // my decorator class to notify
-class NofifierUserStore extends UserStore implements Observable {
+class NofifierUserService extends UserService implements Observable<User> {
 
-   private UserStore delegate;
+   private UserService delegate;
 
    private Observable<User> observer;
 
-   public NofifierUserStore (UserStore delegate, Observable<User> observer) {
+   public NofifierUserService (UserService delegate, Observable<User> observer) {
       this.delegate = delegate;
       this.observer = observer;
    }
@@ -1227,13 +1227,13 @@ class NofifierUserStore extends UserStore implements Observable {
 }
 
 // my decorator class to log
-class LoggerUserStore extends UserStore {
+class LoggerUserService extends UserService {
 
-   private UserStore delegate;
+   private UserService delegate;
 
    private Logger log = new Logger();
 
-   public LoggerUserStore (UserStore delegate) {
+   public LoggerUserService (UserService delegate) {
       this.delegate = delegate;
    }
 
@@ -1257,7 +1257,7 @@ class LoggerUserStore extends UserStore {
 // usage
 
 //use raw behavior
-UserStore store = new UserStore();
+UserService store = new UserService();
 
 store.save(myUser); // saves only
 User userById = store.load(userId); // load only
@@ -1265,8 +1265,8 @@ User userById = store.load(userId); // load only
 
 //use composed behaviors (does order matter?)
 Observer<User> userObserver = SingletonObserver.for(User.class);
-UserStore store = new LoggerUserStore( 
-   new NofifierUserStore( new CacheableUserStore ( new UserStore() ), userObserver) 
+UserService store = new LoggerUserService( 
+   new NofifierUserService( new CacheableUserService ( new UserService() ), userObserver) 
 );
 
 store.save(myUser); // log, save, invalidate cache and send a user change event!
@@ -1282,6 +1282,8 @@ About above ordering:
 - invalidate cache, save, log?
 
 - Sometimes the ordering matters.
+
+Can you suggest improvements on the code above?
 
 #### Cons
 
