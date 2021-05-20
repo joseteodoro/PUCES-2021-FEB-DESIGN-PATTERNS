@@ -42,7 +42,7 @@ layer between senders and receivers.
 
 ### Chain of Responsibility (CoR)
 
-[Link]()
+[Link](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/design-patterns-by-usage.md#behavioral-patterns--chain-of-responsibility-cor)
 
 ### Iterator
 
@@ -108,4 +108,4 @@ or rarely changes.
 
 ### Visitor
 
-[Link]()
+[Link](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/design-patterns-by-usage.md#behavioral-patterns--visitor)

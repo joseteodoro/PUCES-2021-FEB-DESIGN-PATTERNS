@@ -24,7 +24,7 @@ new interfaces and classes are introduced along with the pattern
 
 ### Builder
 
-[Link]()
+[Link](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/design-patterns-by-usage.md#creational-patterns--builder)
 
 ### Object Pool
 
