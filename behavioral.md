@@ -42,23 +42,7 @@ layer between senders and receivers.
 
 ### Chain of Responsibility (CoR)
 
-- Lets you pass requests along a chain of handlers. Upon receiving a request,
-each handler decides either to process the request or to pass it to the next
-handler in the chain.
-
-#### Usage
-
-- Use the pattern when it’s essential to execute several handlers in a particular order.
-
-- Use the CoR pattern when the set of handlers and their order are supposed to
-change at runtime.
-
-#### Cons
-
-- Depends on the way you configure the chain, can be hard to debug / understand
-who changed what in the request.
-
-- Some requests may end up unhandled.
+[Link]()
 
 ### Iterator
 
@@ -124,14 +108,4 @@ or rarely changes.
 
 ### Visitor
 
-- Lets you separate algorithms from the objects on which they operate.
-
-#### Usage
-
-- Use the Visitor when you need to perform an operation on all elements
-of a complex object structure (for example, an object tree).
-
-#### Cons
-
-- Visitors might lack the necessary access to the private fields and methods
-of the elements that they’re supposed to work with.
+[Link]()

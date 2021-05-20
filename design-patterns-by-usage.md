@@ -1536,3 +1536,277 @@ Supplier<String> complex = Collections.reverse(tags)
 
 - Composite: **organize data / behavior** like a tree.
    - long lived
+
+## Creational Patterns / Builder
+
+- lets you construct complex objects step by step. The pattern allows
+you to produce different types and representations of an object using
+the same construction code
+
+- who know how to build is NOT the caller
+
+- there are optional items you can put on the object
+
+- fluent call when creating something
+
+- hides creation complexity / default values
+
+```java
+public class XMLExporter {
+
+   private Encode encoding = new DefaultEncoding();
+
+   private Marshaller marshaller = new DefaultMarshaller();
+
+   public XMLExporter(Encode encoding, Marshaller marshaller) {
+      this.encoding = encoding;
+      this.marshaller = marshaller;
+   }
+
+   public void setMarshaller(Marshaller marshaller) {
+      this.marshaller = marshaller;
+   }
+
+   public void setEncoding(Encode encoding) {
+      this.encoding = encoding;
+   }
+
+   public InputStream export(InputStream source) {
+      Document doc = marshaller.newDocument(encoding);
+      return new DocumentStream(doc.encode(source));
+   }
+
+}
+
+new XMLExporter(
+   new CustomEncoding(),
+   new CustomMarshaller()
+).export(myObjects);
+
+```
+
+what if
+
+```java
+public class XMLExporterBuilder {
+
+   private Encode encoding = new DefaultEncoding();
+
+   private Marshaller marshaller = new DefaultMarshaller();
+
+   public XMLExporterBuilder withEncoding(Encode encoding) {
+      this.encoding = encoding;
+      return this;
+   }
+
+   public XMLExporterBuilder withMarshaller(Marshaller marshaller) {
+      this.marshaller = marshaller;
+      return this;
+   }
+
+   public XMLExporter build() {
+      // any complexity on creation should be here!
+      return new XMLExporter(encoding, marshaller);
+   }
+
+}
+
+public class XMLExporter {
+
+   private Encode encoding = new DefaultEncoding();
+
+   private Marshaller marshaller = new DefaultMarshaller();
+
+   public XMLExporter(Encode encoding, Marshaller marshaller) {
+      this.encoding = encoding;
+      this.marshaller = marshaller;
+   }
+
+   public InputStream export(InputStream source) {
+      Document doc = marshaller.newDocument(encoding);
+      return new DocumentStream(doc.encode(source));
+   }
+
+   public static XMLExporterBuilder builder() {
+      return new XMLExporterBuilder();
+   }
+
+}
+
+// usage
+XMLExporter exporter = XMLExporter.builder()
+   .withEncoding(new CustomEncoding())
+   .withMarshaller(new CustomMarshaller())
+   .build()
+   .export(myObjects);
+
+```
+
+#### Usage
+
+- use the Builder pattern to get rid of a “telescopic constructor”
+
+- use the Builder pattern when you want your code to be able to create
+different representations of some product with some default values
+
+#### Cons
+
+- The overall complexity of the code increases since the pattern
+requires know about all the creation details;
+
+- builder becomes huge with many dependencies
+
+- builder and its classes have strong coupling
+
+## Builder vs Factory Method
+
+- Factory method routes which implementation will be called (polymorphism);
+
+```java
+// can be a xml, a json, a html. Can choose between types
+Exporter exporter = ExporterFactoryByType("xml");
+exporter.export(myObjects);
+
+```
+
+- Builder hides creation details for one object only;
+
+```java
+// always a concrete exporter
+XMLExporter exporter = XMLExporter.builder()
+   .withEncoding(new CustomEncoding())
+   .withMarshaller(new CustomMarshaller())
+   .build()
+   .export(myObjects);
+
+```
+
+## Behavioral Patterns / Chain of Responsibility (CoR)
+
+- Lets you pass requests along a chain of handlers. Upon receiving a request,
+each handler decides either to process the request or to pass it to the next
+handler in the chain.
+
+### Usage
+
+- Use the pattern when it’s essential to execute several handlers in a particular order.
+
+- Use the CoR pattern when the set of handlers and their order are supposed to
+change at runtime.
+
+```javascript
+
+const auth = (request, response, next) => {
+   return isValidUser(request.headers.Authorization)
+      ? next()
+      : response.write(401, "Unauthorized!");
+}
+
+const saveOrder = (request, response, next) => {
+   return Order.save(request.body)
+      .then(
+         (order) => response.write(201, order)
+      );
+}
+
+const endpoint = router.get(auth, saveOrder);
+```
+
+```javascript
+const messages = [
+   {
+      command: "create-user", 
+      payload: {name: 'user-01', email: '01@email.com'}
+   },
+   {
+      command: "disable-user",
+      payload: {name: 'user-99'}
+   },
+   {
+      command: "enable-user",
+      payload: {name: 'user-1001'}
+   },
+   {
+      command: "delete-user",
+      payload: {name: 'user-100'}
+   },
+]
+
+const drop = ({command, payload}, next) => {
+   if (command !== "delete-user") return next();
+   return UserModel.delete(payload.name);
+}
+
+const create = ({command, payload}, next) => {
+   if (command !== "create-user") return next();
+   return UserModel.save(payload);
+}
+
+const enable = ({command, payload}, next) => {
+   if (command !== "enable-user") return next();
+   return UserModel.enable(payload.name);
+}
+
+const disable = ({command, payload}, next) => {
+   if (command !== "disable-user") return next();
+   return UserModel.disable(payload.name);
+}
+
+const process = (message) => {
+   return stack(
+      drop,
+      create,
+      enable,
+      disable
+   );
+}
+// send each message to be processed
+messages.map(msg => process(msg));
+```
+
+what about reuse filters
+
+```javascript
+const processPay = (message) => {
+   return stack(
+      userExists,
+      hasBalance,
+      pay
+   );
+}
+
+const processWithdraw = (message) => {
+   return stack(
+      userExists,
+      hasBalance,
+      withdraw
+   );
+}
+```
+
+### Cons
+
+- Depends on the way you configure the chain, can be hard to debug / understand
+who changed what in the request.
+
+- Some requests may end up unhandled.
+
+- sometimes you need to go into debug to know the stack's sequence
+
+- code kept simple but the relation become complex
+
+
+
+## Behavioral Patterns / Visitor
+
+- Lets you separate algorithms from the objects on which they operate.
+
+### Usage
+
+- Use the Visitor when you need to perform an operation on all elements
+of a complex object structure (for example, an object tree).
+
+### Cons
+
+- Visitors might lack the necessary access to the private fields and methods
+of the elements that they’re supposed to work with.

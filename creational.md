@@ -24,25 +24,7 @@ new interfaces and classes are introduced along with the pattern
 
 ### Builder
 
-- lets you construct complex objects step by step. The pattern allows
-you to produce different types and representations of an object using
-the same construction code
-
-- who know how to build is NOT the caller
-
-- there are optional items you can put on the object
-
-#### Usage
-
-- use the Builder pattern to get rid of a “telescopic constructor”
-
-- use the Builder pattern when you want your code to be able to create
-different representations of some product
-
-#### Cons
-
-- CONS: The overall complexity of the code increases since the pattern
-requires creating multiple new classes
+[Link]()
 
 ### Object Pool
 
