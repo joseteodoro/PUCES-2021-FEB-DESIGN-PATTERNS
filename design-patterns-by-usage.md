@@ -1764,7 +1764,7 @@ const process = (message) => {
 messages.map(msg => process(msg));
 ```
 
-what about reuse filters
+what about reuse filters?
 
 ```javascript
 const processPay = (message) => {
@@ -1787,26 +1787,317 @@ const processWithdraw = (message) => {
 ### Cons
 
 - Depends on the way you configure the chain, can be hard to debug / understand
-who changed what in the request.
+who changed what in the request;
 
-- Some requests may end up unhandled.
+- Some requests may end up unhandled;
 
-- sometimes you need to go into debug to know the stack's sequence
+- sometimes you need to go into debug to know the stack's sequence;
 
-- code kept simple but the relation become complex
+- code kept simple but the relation become complex;
 
+## Behavioral Patterns / Command
 
+- Turns a request into a stand-alone object that contains all information
+about the request. This transformation lets you parameterize methods with
+different requests, delay or queue a request's execution, and support
+undoable operations;
+
+```javascript
+// using code as usual
+orderService.newOrder({
+   clientId: 1001,
+   items: [
+      {id: 1, quantity: 1, price: 1.1},
+      {id: 2, quantity: 1, price: 1.2},
+      {id: 25, quantity: 10, price: 1.2},
+      {id: 1023, quantity: 10, price: 0.3}
+   ]
+})
+
+// using commands
+const message = {
+   command: 'new-order',
+   params: {
+      clientId: 1001,
+      items: [
+         {id: 1, quantity: 1, price: 1.1},
+         {id: 2, quantity: 1, price: 1.2},
+         {id: 25, quantity: 10, price: 1.2},
+         {id: 1023, quantity: 10, price: 0.3}
+      ]
+   }
+}
+
+newOrderQueue.send(message);
+```
+
+### Usage
+
+- Use the Command pattern when you want to parametrize
+objects with operations;
+
+- Use the Command pattern when you want to queue operations,
+schedule their execution, or execute them remotely;
+
+- Use the Command pattern when you want to implement reversible operations.
+Like a sequence of events and you final state is also a compilation
+of all those commands;
+
+```javascript
+const operations = [
+   {user: 1, action: 'deposit', value: 100.0, createdA: 1622139300108},
+   {user: 34, action: 'deposit', value: 10000.0, createdA: 1622139300108},
+   {user: 63, action: 'deposit', value: 120.0, createdA: 1622139300108},
+   {user: 34, action: 'withdraw', value: 130.0, createdA: 1622139300108},
+   {user: 85, action: 'deposit', value: 101.0, createdA: 1622139300108},
+   {user: 3, action: 'deposit', value: 110.0, createdA: 1622139300108},
+   {user: 2, action: 'deposit', value: 20.0, createdA: 1622139300108},
+   {user: 1, action: 'deposit', value: 100.0, createdA: 1622139300108},
+   {user: 60, action: 'deposit', value: 5.0, createdA: 1622139300108},
+   {user: 34, action: 'deposit', value: 12.0, createdA: 1622139300108},
+   {user: 1, action: 'withdraw', value: 150.0, createdA: 1622139300108}
+]
+
+// we try to process and got an error!
+operations.push({user: 1, action: 'withdraw', value: 20.0, createdA: 1622139300108})
+
+//so, we add a compensation to fix the value
+operations.push({user: 1, action: 'deposit', value: 20.0, createdA: 1622139300108})
+
+// and then, 
+const operations = [
+   {user: 1, action: 'deposit', value: 100.0, createdA: 1622139300108},
+   {user: 34, action: 'deposit', value: 10000.0, createdA: 1622139300108},
+   {user: 63, action: 'deposit', value: 120.0, createdA: 1622139300108},
+   {user: 34, action: 'withdraw', value: 130.0, createdA: 1622139300108},
+   {user: 85, action: 'deposit', value: 101.0, createdA: 1622139300108},
+   {user: 3, action: 'deposit', value: 110.0, createdA: 1622139300108},
+   {user: 2, action: 'deposit', value: 20.0, createdA: 1622139300108},
+   {user: 1, action: 'deposit', value: 100.0, createdA: 1622139300108},
+   {user: 60, action: 'deposit', value: 5.0, createdA: 1622139300108},
+   {user: 34, action: 'deposit', value: 12.0, createdA: 1622139300108},
+   {user: 1, action: 'withdraw', value: 150.0, createdA: 1622139300108},
+   {user: 1, action: 'withdraw', value: 17.46, createdA: 1622139300108}, //<-- error
+   {user: 1, action: 'deposit', value: 17.46, createdA: 1622139300108} //<--- compensation
+]
+// seems to be a document oriented nosql?
+```
+
+- use when you need to otimize writing! you need to reprocess all entries to read the current state!
+
+```javascript
+
+const balance = operations.filter(({user}) => user === 1)
+   .map(({ action, value }) => action === 'deposit' ? value : value * -1 )
+   .sum()
+
+```
+
+- audit-logs system;
+
+```javascript
+[
+   {user: 1, action: 'create-order', createdA: 1622139300108, 
+      action: "{user: 1, action: 'deposit', value: 100.0}"},
+   {user: 101, action: 'delete-user', createdA: 1622139300108, 
+      action: "{userId: 1000}"},
+   {user: 153, action: 'create-user', createdA: 1622139300108, 
+      action: "{userId: 100, name: 'banana', email: 'b1@pijamas.org'}"},
+   //...
+   //...
+   {user: 2, action: 'truncate-user', createdA: 1622139300108, 
+      action: "trunce users;"},
+   //...
+   //...
+]
+```
+
+- does sound like messaging systems, kafka and HyperLogLog?
+
+- do you know flux / redux model?
+
+```javascript
+const action = {
+   type: "update-user-preference",
+   preferences: {
+      bgcolor: "#FFF"
+      fgcolor: "#000"
+      font: {
+         size: 12,
+         family: "Arial"
+      }
+   }
+}
+
+const reducer = (state, action) => {
+   switch (action.type) {
+      case "load-user":
+         return { ...state, preferences: defaultPreferences }
+   // ....
+      case "update-user-preference":
+         return { ...state, preferences: action.preferences }
+   // ...
+}
+```
+
+### Cons
+
+- The code may become more complicated since you’re introducing a whole new
+layer between senders and receivers;
+
+- sender and receiver have to talk using the same contract!
+
+- The code become quite flexibe with all the flexibility's problems;
+
+## Behavioral Patterns / Iterator | what about Generator? |
+
+- Lets you traverse elements of a collection without exposing its underlying
+representation (list, stack, tree, etc.);
+
+** Almost all modern languages has `foreach` and that loop already solve the
+same problemas that iterator does;
+
+## Usage (Iterator)
+
+- Use the pattern to reduce duplication of the traversal code across your app;
+
+```java
+   // old fashion C like for
+   List<FileContent> files = listFiles(); 
+   for (int i = 0; i < list.size(); i++) {
+      FileContent content = files.get(i);
+      pushToFTPServer(content);
+   }
+
+   // using iterator
+   List<FileContent> files = listFiles();
+   Iterator<FileContent> it = files.iterator();
+   while (it.hasNext()) {
+      FileContent content = it.next();
+      pushToFTPServer(content);
+   }
+
+   // using foreach
+   List<FileContent> files = listFiles(); 
+   for (FileContent content : files) {
+      pushToFTPServer(content);
+   }
+
+   // using streams
+   listFiles()
+      .stream()
+      .map(pushToFTPServer); 
+
+```
+
+## Usage (Generator)
+
+- provide values on demand without load everything on memory;
+
+using `yield` if you language supports that!
+
+```javascript
+   function* generator() {
+      yield 1; // first call stops here
+      yield 2; // second call stops here
+      yield 3; // third call stops here
+      // end of generator (no more items)
+   }
+
+   const gen = generator(); // "Generator { }"
+
+   console.log(gen.next().value); // 1
+   console.log(generator().next().value); // 1
+   console.log(generator().next().value); // 1
+```
+
+```javascript
+   function* infinite() {
+      let index = 0;
+
+      while (true) {
+         yield index++; // each call stops here and return the index value before its increment!
+      }
+   }
+
+   const generator = infinite(); // "Generator { }"
+
+   console.log(generator.next().value); // 0
+   console.log(generator.next().value); // 1
+   console.log(generator.next().value); // 2
+```
+
+so what?
+
+```javascript
+   function* listAllUsers(limit = 100) {
+      const { userCount } = db.findOne('select count(1) as userCount from users;');
+      const page = 0;
+      const maxPage = userCount / limit;
+
+      while (page < maxPage) {
+         yield db.findMany(`select * as userCount from users limit ${limit} offset ${limit};`); // stops here
+         page++; // run only on next iteration
+      }
+   }
+
+   const gen = listAllUsers(1); // "Generator { }"
+
+   console.log(gen.next().value); // {id: 1, name: 'b1', email: 'b1@pijamas.com'}
+   console.log(gen.next().value); // {id: 2, name: 'b2', email: 'b2@pijamas.com'}
+   console.log(gen.next().value); // {id: 3, name: 'batata', email: 'b1@potatoes.com'}
+   // you can call until the end of the items or use it on a forEach
+```
+
+what about when there are no `yield` operator, like java?
+
+```java
+// note that every jdbc implementation is blocking
+private Supplier<List<User>> generator(int limit) {
+   int page = 0;
+   // each call from stream will fire a request for the query
+   return () -> {
+      ResultSet rs = conn.execute(String.join(" ",
+         "select count(1) as userCount from users",
+         "limit",
+         String.valueOf(limit),
+         "page"
+         String.valueOf(page++),
+         ";"
+      );
+      return User.from(rs);
+   }
+}
+
+public Stream<List<User>> listAllUsers(int limit) {
+   Integer userCount = conn.execute('select count(1) as userCount from users;').next().get(0);
+   // Integer[] possibleCalls = new Integer[userCount / limit];
+   return Stream.generate(generator(limit));
+}
+
+// usage
+listAllUsers(10)
+   .map(users -> users.size())
+   .forEach(System.out::println);
+```
 
 ## Behavioral Patterns / Visitor
 
-- Lets you separate algorithms from the objects on which they operate.
+- Lets you separate algorithms from the objects on which they operate;
+
+- Or lets coordenate some calls for an object;
+
+- Or lets add behavior on a final or third-library class;
 
 ### Usage
 
 - Use the Visitor when you need to perform an operation on all elements
 of a complex object structure (for example, an object tree).
 
+- use when need to extend classes, but you can't change the source code.
+
 ### Cons
 
 - Visitors might lack the necessary access to the private fields and methods
 of the elements that they’re supposed to work with.
+
