@@ -2007,9 +2007,9 @@ using `yield` if you language supports that!
    const gen = generator(); // "Generator { }"
 
    console.log(gen.next().value); // 1
-   console.log(generator().next().value); // 1
-   console.log(generator().next().value); // 1
-```
+   console.log(gen.next().value); // 2
+   console.log(gen.next().value); // 3
+``` 
 
 ```javascript
    function* infinite() {
