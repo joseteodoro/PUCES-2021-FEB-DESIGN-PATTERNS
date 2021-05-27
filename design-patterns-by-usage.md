@@ -2036,7 +2036,7 @@ so what?
       const maxPage = userCount / limit;
 
       while (page < maxPage) {
-         yield db.findMany(`select * as userCount from users limit ${limit} offset ${limit};`); // stops here
+         yield db.findMany(`select * as userCount from users limit ${limit} offset ${page*limit};`); // stops here
          page++; // run only on next iteration
       }
    }
