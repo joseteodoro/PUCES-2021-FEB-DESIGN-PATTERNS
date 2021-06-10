@@ -2321,3 +2321,36 @@ because it’s too dependent on other components.
 ### Cons
 
 - Complexity! Giant methods / functions, god classes, a lot of coupling.
+
+## Behavioral Patterns / Memento
+
+- Lets you save and restore the previous state of an object without revealing
+the details of its implementation.
+
+### Usage
+
+- Use the Memento pattern when you want to produce snapshots of the object’s
+state to be able to restore a previous state of the object.
+
+- what about keep track only over the diff intead of the entire object?
+
+### Cons
+
+- The app might consume lots of RAM if clients create mementos too often.
+
+## Behavioral Patterns / State
+
+- Lets an object alter its behavior when its internal state changes. It appears
+as if the object changed its class
+
+- Finite-State Machine
+
+### Usage
+
+- Use the pattern when you have a class polluted with massive conditionals
+that alter how the class behaves according to the current values of the class’s fields
+
+### Cons
+
+- Applying the pattern can be overkill if a state machine has only a few states
+or rarely changes
