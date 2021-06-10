@@ -2081,6 +2081,210 @@ listAllUsers(10)
    .forEach(System.out::println);
 ```
 
+## Creational Patterns / Dependency injection
+
+- the caller class should depends on the abstraction, 
+and we can change the behavior changing the setup
+
+- we can use builders to change those dependencies
+
+- we can use factories or config files to setup those classes
+
+- Related with encapsulation and abstractions
+
+- Related with fine/coarse grained functions
+
+- Related with SRP
+
+```java
+@Controller
+public class UserController {
+
+   @Autowired
+   private UserService service;
+
+   //...
+}
+
+@Service
+public class UserService {
+
+   @Autowired
+   private UserRepository repository;
+
+   //...
+}
+
+@Repository
+public interface UserRepository interface CrudRepository<T, ID extends Serializable>  {
+
+   //...
+}
+```
+
+- context manager controls and initialize everything! Springboot boot, .net core dependency injection;
+
+- DI scopes (.net | Spring): (transient | prototype), (scoped | request) and singleton;
+
+### Cons
+
+- what about fill what is really needed and keep optional what is nice to have?
+
+```java
+@Controller
+public class UserController {
+
+   public UserController(@Autowired UserService service) {}
+
+   //...
+}
+
+@Service
+public class UserService {
+
+   public UserService(@Autowired UserRepository repository) {}
+
+   //...
+}
+```
+
+- who has the control?
+
+## Structural Patterns / Bridge
+
+- Specification Program Interface e Application Program Interface
+
+- lets you split a large class or a set of closely related classes into
+  two separate hierarchies—abstraction and implementation
+  which can be developed independently of each other
+
+- Related with encapsulation and abstractions
+
+- Related with polymorphism
+
+### Usage
+
+- Use the Bridge pattern when you want to divide and organize a monolithic class that has several variants of some function- ality (for example, if the class can work with various database servers)
+
+- Use the Bridge if you need to be able to switch implementations at runtime
+
+```
+            -> Postgres
+JDBC SPI :  -> MySQL
+            -> Oracle
+
+```
+
+- Defines a specification to be implemented for some providers
+
+- Works great with DI
+
+### Cons
+
+- You might make the code more complicated by applying the pattern to a highly cohesive class.
+
+- high coupled artifacts (SPI and API)
+
+- SPI and projects using it should release in sync
+
+## Structural Patterns / Facade
+
+- hides complexity and internal structure
+
+- provides a simplified interface to a library, a framework, or any other complex set of classes
+
+### Usage
+
+- When you have a lot of classes / artifacts, but want to expose only
+few for the clients.
+
+- When you want to create a single point of contact with your callers
+
+### Cons
+
+- A facade can become a god object coupled to all classes of an app.
+
+- Be careful to not give more responsabilities than needed (like business logic on facade).
+
+## Creational Patterns / Object pool
+
+- reuse what is scarce
+
+- what about the queue size?
+
+- what we do when there is no more resources?
+Throw error or enqueue?
+
+- db connection pool
+    - startup 4 connections (ready)
+    - max 10 connections
+    - max idle-timeout
+
+## Creational Patterns / Prototype
+
+- reuse what is expensive to load
+
+- what about concurrence?
+
+- lets you copy existing objects without making your code dependent
+on their classes (let's clone)
+
+- you can clone objects without coupling to their concrete
+classes
+
+### Usage
+
+- use the Prototype pattern when your code shouldn’t depend on the
+concrete classes of objects that you need to copy
+
+### Cons
+
+- cloning complex objects that have circular references might be very tricky
+
+- be careful about concurrence
+
+### Prototype Registry
+
+- provides an easy way to access frequently-used prototypes.
+It stores a set of pre-built objects that are ready to be copied.
+The simplest prototype registry is a name → prototype hash map.
+However, if you need better search criteria than a simple name,
+you can build a much more robust version of the registry
+
+## Structural Patterns / Flyweight
+
+- lets you fit more objects into the available amount of RAM by sharing common
+  parts of state between multiple objects instead of keeping all of the data in
+  each object
+
+### Usage
+
+- Reuse / share expensive resources
+
+- Be careful about mutations
+
+### Cons
+
+- Can lead to complexity to reuse the expensive objects
+
+- Can lead to race conditions if the shared state are mutable
+
+- Can increase the time to the expensive resource be garbage collected
+
+## Prototype vs Flyweight
+
+- In Flyweight, object is immutable;
+
+- In Prototype, object is mutable;
+
+- Flyweight is about saving memory by not creating new objects and reusing existing ones when possible;
+
+- Prototype is about, reusing existing object in order to save cost of new object creation;
+
+- Flyweight is used when creating multiple type of single object;
+
+- Prototype is used when creating single type of single object.
+
 ## Behavioral Patterns / Visitor
 
 - Lets you separate algorithms from the objects on which they operate;
@@ -2101,3 +2305,19 @@ of a complex object structure (for example, an object tree).
 - Visitors might lack the necessary access to the private fields and methods
 of the elements that they’re supposed to work with.
 
+## Behavioral Patterns / Mediator
+
+- Lets you reduce chaotic dependencies between objects. The pattern restricts
+direct communications between the objects and forces them to collaborate only
+via a mediator object.
+
+- mediator or orchestration?
+
+### Usage
+
+- Use the pattern when you can’t reuse a component in a differ- ent program
+because it’s too dependent on other components.
+
+### Cons
+
+- Complexity! Giant methods / functions, god classes, a lot of coupling.

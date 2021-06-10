@@ -16,29 +16,7 @@
 
 ### Command
 
-- Turns a request into a stand-alone object that contains all information
-about the request. This transformation lets you parameterize methods with
-different requests, delay or queue a request's execution, and support
-undoable operations.
-
-#### Usage
-
-- Use the Command pattern when you want to parametrize
-objects with operations.
-
-- Use the Command pattern when you want to queue operations,
-schedule their execution, or execute them remotely.
-
-- *Use the Command pattern when you want to implement reversible operations.
-Like a sequence of events and you final state is also a compilation
-of all those commands.
-
-#### Cons
-
-- The code may become more complicated since you’re introducing a whole new
-layer between senders and receivers.
-
-- The code become quite flexibe with all the flexibility's problems.
+[Link](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/design-patterns-by-usage.md#behavioral-patterns--command)
 
 ### Chain of Responsibility (CoR)
 
@@ -46,15 +24,7 @@ layer between senders and receivers.
 
 ### Iterator
 
-- Lets you traverse elements of a collection without exposing its underlying
-representation (list, stack, tree, etc.).
-
-** Almost all modern languages has `foreach` and that loop already solve the
-same problemas that iterator does.
-
-#### Usage
-
-- Use the pattern to reduce duplication of the traversal code across your app.
+[Link](https://github.com/joseteodoro/PUCES-2021-FEB-DESIGN-PATTERNS/blob/main/design-patterns-by-usage.md#behavioral-patterns--iterator--what-about-generator-)
 
 ### Mediator
 
