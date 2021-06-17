@@ -2148,25 +2148,27 @@ public class UserService {
 }
 ```
 
-- who has the control?
+- who has the control? Can be hard to understand bugs;
 
 ## Structural Patterns / Bridge
 
-- Specification Program Interface e Application Program Interface
+- Specification Program Interface e Application Program Interface;
 
-- lets you split a large class or a set of closely related classes into
-  two separate hierarchies—abstraction and implementation
-  which can be developed independently of each other
+- lets you split a large class or a set of closely related classes into two separate hierarchies—abstraction and implementation which can be developed independently of each other;
 
-- Related with encapsulation and abstractions
+- Related with encapsulation and abstractions;
 
-- Related with polymorphism
+- Related with polymorphism;
 
 ### Usage
 
-- Use the Bridge pattern when you want to divide and organize a monolithic class that has several variants of some function- ality (for example, if the class can work with various database servers)
+- Use the Bridge pattern when you want to divide and organize a monolithic class that has several variants of some functionality (for example, if the class can work with various database servers)
 
 - Use the Bridge if you need to be able to switch implementations at runtime
+
+- Defines a specification (set of interfaces / basic implementations) to be implemented for some providers
+
+- Works great with DI
 
 ```
             -> Postgres
@@ -2175,50 +2177,150 @@ JDBC SPI :  -> MySQL
 
 ```
 
-- Defines a specification to be implemented for some providers
 
-- Works great with DI
+```java
+// SPI
+public interface Connection {
+   ResultSet execute(String sql, Map<String, Object> params);
+}
+
+public interface Driver {
+   Connection connect(String connectionString);
+}
+
+```
+
+```java
+// API oracle (another library / jar file)
+public class OracleConnection implements Connection {
+   ResultSet execute(String sql, Map<String, Object> params) {}
+}
+
+public interface OracleDriver implements Driver {
+   OracleConnection connect(String connectionString) {}
+}
+
+```
+
+```java
+// API postgres (another library / jar file)
+public class PostgreSQLConnection implements Connection {
+   ResultSet execute(String sql, Map<String, Object> params) {}
+}
+
+public interface PostgreSQLDriver implements Driver {
+   PostgreSQLConnection connect(String connectionString) {}
+}
+```
+
+- Looks like template method, but it's  more than that!
+
+- Related with polimorphism;
+
+- Related with abstraction;
+
+- Related with encapsulation;
+
+- Related with SRP on library level;
 
 ### Cons
 
-- You might make the code more complicated by applying the pattern to a highly cohesive class.
+- You might make the code more complicated by applying the pattern to a highly cohesive class;
 
-- high coupled artifacts (SPI and API)
+- high coupled artifacts (SPI and API);
 
-- SPI and projects using it should release in sync
+- SPI and projects using it should release in sync;
 
 ## Structural Patterns / Facade
 
-- hides complexity and internal structure
+- hides complexity and internal structure;
 
-- provides a simplified interface to a library, a framework, or any other complex set of classes
+- provides a simplified interface to a library, a framework, or any other complex set of classes;
+
+- structures a subsystem into layers;
 
 ### Usage
 
-- When you have a lot of classes / artifacts, but want to expose only
-few for the clients.
+- When you have a lot of classes / artifacts, but want to expose only few for the clients;
 
-- When you want to create a single point of contact with your callers
+- When you want to provide a simpler interface than what an existing subsystem already provides;
+
+- When you want to create a single point of contact with your callers;
+
+```java
+public class CreditFacade {
+
+   public Boolean hasCredit(User user, BigDecimal value) {
+      // hides a lot of calls and dependencies to manage a request
+      // user services
+      // risk management services
+      // credit services
+      // financial services
+   }
+
+}
+
+// client calling the feature
+
+User user = User.from(request.body);
+BigDecimal value = Value.from(request.body);
+Boolean canOrder = CreditFacade.getInstance().hasCredit(user, value);
+```
+
+- When you want to structure your system into layers. You can expose olny facade for any client (developer / external modules);
+
+Directory structure for User module:
+
+```
+├── repositories
+├── controllers
+└── services
+└── UserFacade.java
+```
 
 ### Cons
 
-- A facade can become a god object coupled to all classes of an app.
+- A facade can become a god object coupled to all classes of an app;
 
-- Be careful to not give more responsabilities than needed (like business logic on facade).
+- Be careful to not give more responsabilities than needed (like business logic on facade);
 
 ## Creational Patterns / Object pool
 
-- reuse what is scarce
+- (also known as resource pools);
 
-- what about the queue size?
+- reuses what is scarce;
 
-- what we do when there is no more resources?
-Throw error or enqueue?
+- restricts the number of objects created;
 
-- db connection pool
-    - startup 4 connections (ready)
-    - max 10 connections
-    - max idle-timeout
+- free (already used) resources can be managed by one coherent policy;
+
+Database connection example (db connections are limited):
+
+```yaml
+db-connection:
+   pool:
+      min-connections: 4 #ready connections on startup
+      max-connections: 10 #max opened connections
+      idle-timeout: 30000 # 30 seconds to kill/invalidate an idle connection
+```
+
+- can we use resource pool to control a set of phisical devices (smart phones running tests for example)?
+
+- can we use to hack api-key limit ratio?
+
+- can we use to reach homogeneous sharding distribution?
+
+- can we use to control remote agents (like jenkins agents for example)?
+
+- what we do when there is no more resources? Throw error or enqueue?
+
+## Pull (Load balancing vs Resource Pool) vs push model (messaging)
+
+- client need do use a resource:
+   - load balancing: client ask for resource and LB hides complexity (separation for concerns between applications);
+   - resource pool: client ask for resource and resource pool hides complexity (all running inside your application);
+   - messaging: client send a command inside a message;
+
 
 ## Creational Patterns / Prototype
 
