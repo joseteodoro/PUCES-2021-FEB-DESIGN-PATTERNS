@@ -2188,15 +2188,34 @@ public interface Driver {
    Connection connect(String connectionString);
 }
 
+public abstract class ResultSet {
+   
+   public Boolean hasNext() {
+      //...
+   };
+
+   public abstract Boolean Next();
+
+   public abstract Boolean getString(Integer position);
+
+   public abstract Boolean getString(String field);
+
+   ///...
+}
+
 ```
 
 ```java
 // API oracle (another library / jar file)
-public class OracleConnection implements Connection {
-   ResultSet execute(String sql, Map<String, Object> params) {}
+public class OracleResultSet extends ResultSet {
+   // ...
 }
 
-public interface OracleDriver implements Driver {
+public class OracleConnection implements Connection {
+   OracleResultSet execute(String sql, Map<String, Object> params) {}
+}
+
+public class OracleDriver implements Driver {
    OracleConnection connect(String connectionString) {}
 }
 
@@ -2204,11 +2223,15 @@ public interface OracleDriver implements Driver {
 
 ```java
 // API postgres (another library / jar file)
-public class PostgreSQLConnection implements Connection {
-   ResultSet execute(String sql, Map<String, Object> params) {}
+public class PostgreSQLResultSet extends ResultSet {
+   // ...
 }
 
-public interface PostgreSQLDriver implements Driver {
+public class PostgreSQLConnection implements Connection {
+   PostgreSQLResultSet execute(String sql, Map<String, Object> params) {}
+}
+
+public class PostgreSQLDriver implements Driver {
    PostgreSQLConnection connect(String connectionString) {}
 }
 ```
