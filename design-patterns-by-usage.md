@@ -2347,6 +2347,8 @@ db-connection:
 
 ## Creational Patterns / Prototype
 
+- A fully initialized instance to be copied or cloned
+
 - reuse what is expensive to load
 
 - what about concurrence?
@@ -2357,10 +2359,76 @@ on their classes (let's clone)
 - you can clone objects without coupling to their concrete
 classes
 
+- deep copy vs shallow copy
+
 ### Usage
 
 - use the Prototype pattern when your code shouldn’t depend on the
 concrete classes of objects that you need to copy
+
+```java
+
+public class ExporterFactory {
+
+   //..
+
+   public Exporter create(String type) {
+      if (type.equals("xml")) return new XMLExporter();
+      if (type.equals("json")) return new JSONExporter();
+      if (type.equals("txt")) return new TXTExporter();
+      throw new RuntimeException("Couldnt find type " + type);
+   }
+
+}
+
+// usage
+Exporter exporter = ExporterFactory.create("xml");
+exporter.export(orders);
+//..
+
+// dozen of lines later
+
+// for some reason need to pass a new instance
+new ReportEngine(ExporterFactory.create("xml")); // what about I dont know the concrete type
+
+new ReportEngine(exporter.clone()); // work even I dont know the concrete type
+
+```
+
+- use when you have resources that can be expensive to load but cheap to clone or non safe for concurency
+
+```java
+public class ComposeableValidator {
+
+   private List<Validator> nonThreadSafeValidators;
+
+   public ComposeableValidator() {
+      this.nonThreadSafeValidators = new LinkedList();
+   }
+
+   private ComposeableValidator(List<Validator> validators) {
+      this.nonThreadSafeValidators = validators;
+   }
+
+   public void compose(Validator validator) {
+      this.nonThreadSafeValidators.add(validator);
+   }
+
+   @Override
+   // deep copy!
+   public clone() {
+      return new ComposeableValidator(
+         this.nonThreadSafeValidators.stream()
+            .map(p -> p.clone())
+            .collect(Collectiors.asList())
+      );
+   }
+
+   ///... lot of methods
+
+}
+
+```
 
 ### Cons
 
@@ -2376,17 +2444,126 @@ The simplest prototype registry is a name → prototype hash map.
 However, if you need better search criteria than a simple name,
 you can build a much more robust version of the registry
 
+```java
+// using class to search
+public class PrototypeRegistry {
+
+   private static Map<Class<?>, Object> protos = new HashMap<>();
+
+   public static <T> T registryProto(Class<T> type, Supplier<T> supplier) {
+      Object proto = protos.get(type);
+      if (Objects.isNull(proto)) {
+         // not found? instantiate a new one using supplier
+         protos.put(type, supplier.get());   
+      }
+      return type.cast(proto);
+   }
+
+   public static <T> T registryProto(Class<T> type, T value) {
+      return registryProto(type, () -> value);
+   }
+
+   public static <T> T getProto(Class<T> type) {
+      return type.cast(protos.get(type)).clone();
+   }
+}
+
+// registry
+
+UserController controller = new UserController(); // 0x1000000
+UserService service = new UserService(); // 0x2000000
+PrototypeRegistry.registryProto(UserController.class, controller);
+PrototypeRegistry.registryProto(UserService.class, () -> service);
+
+// consuming
+
+UserService service = PrototypeRegistry.getProto(UserService.class); // 0x1000001
+UserController controller = PrototypeRegistry.getProto(UserController.class); // 0x2000001
+
+PrototypeRegistry.getProto(UserClient.class); // null
+
+```
+
+- what about compose registry with factories?
+
+```java
+UserApplicationFactory factory = UserApplicationFactory.getInstance();
+PrototypeRegistry.registryProto(UserApplication.class, () -> factory.create('json'));
+```
+
+- what about compose builders with prototypes?
+
+```java
+public class DeviceControllerBuilder {
+
+   //...
+
+   public DeviceControllerBuilder withDeviceModel(BIOS bios) {
+      this.bios = bios;
+   }
+
+   public DeviceControllerBuilder withDeviceModel(Model model) {
+      this.model = model;
+   }
+
+   public DeviceController fillCustomizedFields(DeviceController controller) {
+      DeviceController clone = controller.clone();
+      if (Objects.nonNull(this.model)) controller.setModel(this.model);
+      if (Objects.nonNull(this.BIOS)) controller.setBIOS(this.BIOS);
+      //...
+      return clone;
+   }
+
+   public DeviceController build() {
+      DeviceController controller = PrototypeRegistry.getProto(DeviceController.class);
+      return this.fillCustomizedFields(controller);
+   }
+
+}
+```
+
+
 ## Structural Patterns / Flyweight
 
 - lets you fit more objects into the available amount of RAM by sharing common
   parts of state between multiple objects instead of keeping all of the data in
   each object
 
+- A fine-grained instance used for efficient sharing
+
 ### Usage
 
 - Reuse / share expensive resources
 
 - Be careful about mutations
+
+```java
+public class ApplicationConfig {
+   
+   // expensive to load or to keep in memory
+   private DeviceDriver driver = DeviceDriver.newInstance();
+
+   // expensive to load or to keep in memory
+   private DBConnection connection = DBConnection.newInstance();
+
+   public Statement newStatement() {
+      return connection.preparedStatement();
+   }
+
+   public DeviceChannel newDeviceChannel() {
+      return driver.createChannel();
+   }
+
+   ///... 
+
+}
+
+//usage 
+
+DeviceChannel channel = ApplicationConfig.getInstance().newDeviceChannel();
+channel.send("device command!");
+
+```
 
 ### Cons
 
@@ -2409,6 +2586,12 @@ you can build a much more robust version of the registry
 - Flyweight is used when creating multiple type of single object;
 
 - Prototype is used when creating single type of single object.
+
+## Object Pool vs Flyweight
+
+- object pool keep a set of objects (same type) and rotate between them (for concurrency reasons, maybe);
+
+- flyweight should keep a single instance for an object to perform better! (should be immutable and thread-safe);
 
 ## Behavioral Patterns / Visitor
 
