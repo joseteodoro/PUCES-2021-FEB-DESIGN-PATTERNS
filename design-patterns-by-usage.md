@@ -2329,7 +2329,125 @@ db-connection:
 
 - can we use resource pool to control a set of phisical devices (smart phones running tests for example)?
 
+
+```java
+public class ResourceItem<T> implements AutoCloseable {
+
+   private boolean isFree;
+
+   private T value;
+
+   public void alloc() {
+      isFree = false;
+   }
+
+   public void free() {
+      isFree = true;
+   }
+
+   @Override
+   public void close() {
+      this.free();
+   }
+
+}
+
+// fixed size pool
+public class ResourcePool<T> {
+
+   private List<T> resources;
+
+   private ResourcePool(T ... resources) {
+      this.resources = LinkedList.from(resources);
+   }
+
+   private static volatile ResourcePool<T> instance;
+
+   public static registry(T ... resources) {
+      if (Objects.isNull(instance)) {
+         instance = new ResourcePool(resources);
+      }
+      return instance;
+   }
+
+   public static getInstance() {
+      if (Objects.nonNull(instance)) {
+         return instance;
+      }
+      throw new RuntimeException("no resources available");
+   }
+
+   public synchronized T alloc() {      
+      Optional<T> result = this.resources.stream()
+         .filter(p -> p.isFree)
+         .findFirst();
+
+      if (result.isPresent()) {
+         result.alloc();
+         return result.get();
+      }
+
+      throw new RuntimeException("no more resources available");
+   }
+
+   public synchronized void free(T value) {
+      Optional<T> result = this.resources.stream()
+         .filter(p -> p.value.equals(value))
+         .findFirst();
+      if (result.isPresent()) {
+         result.free();
+      }
+   }
+
+}
+
+// initialize resources
+SmartPhone sp0 = new SmartPhone("galaxy xx");
+SmartPhone sp1 = new SmartPhone("zenfone 6z");
+SmartPhone sp2 = new SmartPhone("iphone x2");
+ResourcePool<SmartPhone> pool = ResourcePool<>.registry(sp0, sp1, sp2);
+
+// calling resources
+try (SmartPhone callingPhone = ResourcePool<>.getInstance().alloc()) {
+   callingPhone.call(randomNumber());
+} // autoclose called for jvm
+
+try (SmartPhone restartingPhone = ResourcePool<>.getInstance().alloc()) {
+   restartingPhone.restart();
+} // autoclose called for jvm
+
+try (SmartPhone restartingPhone = ResourcePool<>.getInstance().alloc()) {
+   restartingPhone.downloadURL("https://meet.google.com/download?hvnartacw");
+} // autoclose called for jvm
+
+try (SmartPhone restartingPhone = ResourcePool<>.getInstance().alloc()) { 
+// this call throw error cause we dont have more resources  
+}
+
+```
+
 - can we use to hack api-key limit ratio?
+
+```java
+// initialize resources
+httpClient apikey0 = new httpClient("najkdfhjkashdnfkasjdnfa");
+httpClient apikey1 = new httpClient("uioquerjnmadfdkpvajlqew");
+httpClient apikey2 = new httpClient("mlpmapokdofjasdkmfakodj");
+ResourcePool<httpClient> pool = ResourcePool<>.registry(apikey0, apikey1, apikey2);
+
+// calling resources
+try (httpClient client0 = ResourcePool<>.getInstance().alloc()) {
+   client0.downloadURL("https://meet.google.com/download?hvnarasdfastacw");
+} // autoclose called for jvm
+
+try (httpClient client1 = ResourcePool<>.getInstance().alloc()) {
+   client1.downloadURL("https://meet.google.com/download?3421qrqdasdfdas");
+} // autoclose called for jvm
+
+try (httpClient client2 = ResourcePool<>.getInstance().alloc()) {
+   client2.downloadURL("https://meet.google.com/download?klpqoweprkalsdf");
+} // autoclose called for jvm
+```
 
 - can we use to reach homogeneous sharding distribution?
 
@@ -2339,11 +2457,44 @@ db-connection:
 
 ## Pull (Load balancing vs Resource Pool) vs push model (messaging)
 
-- client need do use a resource:
+* client need do use a resource:
    - load balancing: client ask for resource and LB hides complexity (separation for concerns between applications);
+
+```java
+   httpClient.get("https://google.com.br") // google's LB handles server to balance the calls
+   httpClient.get("https://google.com.br")
+   httpClient.get("https://google.com.br")
+   httpClient.get("https://google.com.br")
+```
+
    - resource pool: client ask for resource and resource pool hides complexity (all running inside your application);
+
+```java
+// you handle the pool to balance the calls
+
+// calling resources
+try (httpClient client0 = ResourcePool<>.getInstance().alloc()) {
+   client0.downloadURL("https://meet.google.com/download?hvnarasdfastacw");
+} // autoclose called for jvm
+
+try (httpClient client1 = ResourcePool<>.getInstance().alloc()) {
+   client1.downloadURL("https://meet.google.com/download?3421qrqdasdfdas");
+} // autoclose called for jvm
+
+try (httpClient client2 = ResourcePool<>.getInstance().alloc()) {
+   client2.downloadURL("https://meet.google.com/download?klpqoweprkalsdf");
+} // autoclose called for jvm
+```
+
    - messaging: client send a command inside a message;
 
+```java
+   queueClient.send("{\"command\": \"download\", \"url\": \"https://google.com.br\"") 
+   queueClient.send("{\"command\": \"download\", \"url\": \"https://google.com.br\"")
+   queueClient.send("{\"command\": \"download\", \"url\": \"https://google.com.br\"")
+   queueClient.send("{\"command\": \"download\", \"url\": \"https://google.com.br\"")
+   // queue client will manage how much messages can be consumed at same time
+```
 
 ## Creational Patterns / Prototype
 
@@ -2351,15 +2502,8 @@ db-connection:
 
 - reuse what is expensive to load
 
-- what about concurrence?
-
 - lets you copy existing objects without making your code dependent
 on their classes (let's clone)
-
-- you can clone objects without coupling to their concrete
-classes
-
-- deep copy vs shallow copy
 
 ### Usage
 
@@ -2367,7 +2511,6 @@ classes
 concrete classes of objects that you need to copy
 
 ```java
-
 public class ExporterFactory {
 
    //..
@@ -2394,6 +2537,8 @@ new ReportEngine(ExporterFactory.create("xml")); // what about I dont know the c
 new ReportEngine(exporter.clone()); // work even I dont know the concrete type
 
 ```
+
+- what about concurrence?
 
 - use when you have resources that can be expensive to load but cheap to clone or non safe for concurency
 
@@ -2424,17 +2569,59 @@ public class ComposeableValidator {
       );
    }
 
+   public boolean validate(ValidationAware obj) {
+      Optional<Boolean> valid = this.nonThreadSafeValidators.stream()
+            .map(p -> p.validate(obj))
+            .filter(p -> p)
+            .findFirst();
+
+      return valid.isPresent()
+         ? valid
+         : false;
+   }
+
    ///... lot of methods
 
 }
 
+// usage
+ComposeableValidator validator = //initialize your validator here;
+
+// clone validator to avoid thread conflicts for non thread-safe validators!
+requests.stream().map(r -> validator.clone().validate(r)).collect(Collectors.toList());
+```
+
+- deep copy vs shallow copy
+
+```java
+
+public class Values<T> {
+
+   private List<T> content;
+   
+   public Values<T> shallowcopy() { // shallow
+      return new Values(
+         new LinkedList(this.content)
+      );
+   }
+
+   public Values<T> deepcopy() { // deep
+      List<T> clone = this.content.stream()
+         .map(c -> c.clone())
+         .collect(Collectors.toList())
+      return new Values(clone);
+   }
+
+}
+
+// if you want to mutate the content state, shallow is not safe for collections!
 ```
 
 ### Cons
 
 - cloning complex objects that have circular references might be very tricky
 
-- be careful about concurrence
+- be careful about concurrency
 
 ### Prototype Registry
 
@@ -2522,7 +2709,6 @@ public class DeviceControllerBuilder {
 }
 ```
 
-
 ## Structural Patterns / Flyweight
 
 - lets you fit more objects into the available amount of RAM by sharing common
@@ -2583,9 +2769,9 @@ channel.send("device command!");
 
 - Prototype is about, reusing existing object in order to save cost of new object creation;
 
-- Flyweight is used when creating multiple type of single object;
+- Flyweight is used when creating multiple type using single existent object;
 
-- Prototype is used when creating single type of single object.
+- Prototype is used when creating single type using single existent object.
 
 ## Object Pool vs Flyweight
 
