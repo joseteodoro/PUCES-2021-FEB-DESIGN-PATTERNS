@@ -2749,6 +2749,40 @@ public class ApplicationConfig {
 DeviceChannel channel = ApplicationConfig.getInstance().newDeviceChannel();
 channel.send("device command!");
 
+
+public class ReportBuilder {
+
+   private static Image logo;
+
+   static {
+      logo = PNGImage.load('./images/logo.png');
+   }
+
+   private ClientInfo info;
+   
+   private List<Order> orders;
+
+   public ReportBuilder with(ClientInfo info) {
+      this.info = info;
+      return this;
+   }
+   
+   public ReportBuilder with(List<Order> orders) {
+      this.orders = orders;
+      return this;
+   }
+
+   public Report build() {
+      return new ReportEngine()
+         .header(ReportBuilder.logo, this.info)
+         .data(this.orders)
+         .generate();
+   }
+
+}
+
+// all reports with reuse same image in-memory
+
 ```
 
 ### Cons
@@ -2785,12 +2819,136 @@ channel.send("device command!");
 
 - Or lets coordenate some calls for an object;
 
+- related with abstraction;
+
+- related with overloading functions;
+
+- related with polimorphism;
+
+```java
+// traverse file system
+public class Traverser {
+
+   public Stream<String> visit(File file) {
+      return Stream.of(file.getCanonicalPath());
+   }
+
+   public Stream<String> visit(Directory parent) {
+      return Stream.of(
+         parent.listDirs().stream()
+            .map(dir -> visit(dir))),  
+         parent.listFiles().stream()
+            .map(file -> visit(file))
+      )
+      .flatMap(p -> p);
+   }
+
+}
+
+
+// usage to traverse all files in a directory
+
+List<String> allFiles = new Traverser()
+                           .visit(baseDirectory)
+                           .collect(Collectors.toList());
+
+
+```
+
+```java
+// applying changes under specific conditions
+
+public class TaxFreeProduct {
+   private Product product;
+}
+
+public class ShippingFreeProduct {
+   private Product product;
+}
+
+public class VoucherAwareProduct {
+   private Product product;
+   private Voucher voucher;
+}
+
+// immutable
+public class Visitor {
+
+   public BigDecimal visit(TaxFreeProduct p) {
+      return p.product.getTotal() + p.product.getShipping();
+   }
+
+   public BigDecimal visit(ShippingFreeProduct p) {
+      return p.product.getTax() + p.product.getTotal();
+   }
+
+   public BigDecimal visit(VoucherAwareProduct p) {
+      return voucher.apply(p.product.getTotal());
+   }
+
+}
+
+// using visitor
+public BigDecimal orderValue(List<Product> products) {
+   return Stream.of(
+      products.stream()
+         .filter(p -> p.isFreeShipping())
+         .map(p -> new ShippingFreeProduct(p))
+         .map(Visitor::visit)
+      ,
+      products.stream()
+         .filter(p -> p.isFreeTax())
+         .map(p -> new ShippingFreeProduct(p))
+         .map(Visitor::visit)
+   ).flatMap(s -> s) //returns a flattened stream
+   .reduce(BigDecimal.ZERO, (total, next) -> total.add(next));
+}
+
+// calling the total functions
+BigDecimal total = orderValue(order.getProducts());
+
+
+// what about a mutable visitor?
+
+
+// what about using decorator here?
+//    - coordination vs onion model
+```
+
 - Or lets add behavior on a final or third-library class;
+
+```java
+// mutable visitor (with side effects)
+public class NextPageVisitor {
+
+   public void visit(PrinterHP printer) {
+      printer.sendCommand("end of section");
+      printer.sendCommand("end of page");
+      printer.sendCommand("feed new page");
+   }
+
+   public void visit(PrinterLX printer) {
+      printer.cmd("end page and feed new page");
+   }
+
+   public void visit(PrinterEPSON printer) {
+      printer.feed();
+   }
+
+}
+
+// usage
+
+NextPageVisitor.visit(printer); 
+// for any of the printers, the 
+// language can overload the function call
+// if the printer classes are final you cannot extend!
+```
 
 ### Usage
 
 - Use the Visitor when you need to perform an operation on all elements
-of a complex object structure (for example, an object tree).
+of a complex object structure (for example, an object tree / composite).
 
 - use when need to extend classes, but you can't change the source code.
 
@@ -2803,14 +2961,94 @@ of the elements that they’re supposed to work with.
 
 - Lets you reduce chaotic dependencies between objects. The pattern restricts
 direct communications between the objects and forces them to collaborate only
-via a mediator object.
+by a mediator object;
 
 - mediator or orchestration?
 
+- kinda reversed observer;
+
+```java
+// simple observer
+public class ObserverAware {
+
+   private List<Observer> observers;
+
+   public void registry(Observer obs) { this.observers.add(obs); }
+
+   public void notify(Event event) {
+      this.observers.stream()
+         .forEach(o -> o.notify(event)); 
+   }
+
+}
+
+// message bus
+public class MessageBus implements Observable<K extends ObservationAware<Message>> {
+
+   private static MessageBus instance = new MessageBus();
+
+   public static MessageBus getInstance() {
+      return instance;
+   }
+
+   private MessageBus() { super(); }
+
+   private Map<K, List<ObservationAware<Message>>> listeners = new HashMap<>();
+
+   public static void registry(K listener, String event) {
+      if (instance.listeners.get(event) == null) {
+         instance.listeners.put(event, new LinkedList<>());
+      }
+      instance.listeners
+         .get(event)
+         .add(listener);
+   }
+
+   public static void emit(Message message) {
+      instance.listeners
+         .get(message.eventType())
+         .forEach(l -> l.onData(message));
+   }
+
+}
+
+// mediator
+public class Mediator {
+
+   public void notify(Event event) {
+      if (event.getType() == "user:create") {
+         profileService.createProfileByUserId(event.getId());
+         homepageService.setupEnvironmentByUserId(event.getId());
+         smsService.sent(
+            userService.findUser(event.getId()).getPhone()
+            ,
+            "Thank you to join our community"
+         );
+      }
+
+      if (event.getType() == "user:resetEnvironment") {
+         homepageService.setupEnvironmentByUserId(event.getId());
+         smsService.sent(
+            userService.findUser(event.getId()).getPhone()
+            ,
+            "Environment restored"
+         );
+      }
+      // and so on
+   }
+
+}
+```
+-  mediator have to know all coordenated classes staticaly
+
+- observer dispatch messages dinamically
+
 ### Usage
 
-- Use the pattern when you can’t reuse a component in a differ- ent program
-because it’s too dependent on other components.
+- Use the pattern when you can’t reuse a component in a different program
+because it’s too dependent on other components;
+
+- Use the pattern when you want to something like message bus, but can’t change the target classes (third party final classes);
 
 ### Cons
 
@@ -2821,12 +3059,51 @@ because it’s too dependent on other components.
 - Lets you save and restore the previous state of an object without revealing
 the details of its implementation.
 
+- lets call is 'save state' to restore that if needed;
+
 ### Usage
 
 - Use the Memento pattern when you want to produce snapshots of the object’s
 state to be able to restore a previous state of the object.
 
+```java
+public class UserService {
+
+   public void save(User updated) {
+      User loaded = this.findById(updated.getId());
+      this.takeSnapshot(Diff.of(loaded, updated));
+      repository.save(updated);
+   }
+
+   public restore(User user, Uuid version) {
+      User restored = this.restoreSnapshot(user, version);
+      repository.save(restored);
+   }
+
+}
+```
+
+
 - what about keep track only over the diff intead of the entire object?
+
+- what if we combine that with Command?
+
+- what if we have diffs plus some checkpoints with full state?
+
+```javascript
+const snapshots = [
+   { action: 'deposit', value: 100.0, createdA: 1622139300108},
+   { action: 'deposit', value: 10.0, createdA: 1622139300108},
+   { action: 'deposit', value: 1.0, createdA: 1622139300108},
+   { action: 'withdraw', value: 11.0, createdA: 1622139300108},
+   { action: 'balance', value: 100.0, createdA: 1622139300108},
+   { action: 'deposit', value: 10.0, createdA: 1622139300108},
+   { action: 'deposit', value: 20.0, createdA: 1622139300108},
+   { action: 'balance', value: 130.0, createdA: 1622139300108}
+]
+```
+
+- Full state vs diff;
 
 ### Cons
 
@@ -2834,10 +3111,44 @@ state to be able to restore a previous state of the object.
 
 ## Behavioral Patterns / State
 
-- Lets an object alter its behavior when its internal state changes. It appears
-as if the object changed its class
+- lets an object alter its behavior when its internal state changes. It appears
+as if the object changed its class;
 
-- Finite-State Machine
+- finite-state Machine;
+
+- coordinate steps;
+
+```java
+
+public class StateController {
+
+   @MessageListener("order.state.update")
+   public void onUpdate(Order order) {
+      if (order.getState() == "created") {
+         order.setState("validating");
+         repository.save(order);
+         validationQueue.send(order);
+      }
+      if (order.getState() == "valid") {
+         order.setState("processing");
+         repository.save(order);
+         processQueue.send(order);
+      }
+      if (order.getState() == "done") {
+         order.setState("done");
+         repository.save(order);
+         reponseQueue.send(order);
+      }
+      if (order.getState() == "invalid") {
+         order.setState("error");
+         repository.save(order);
+         reponseQueue.send(order);
+      }
+   }
+
+}
+
+```
 
 ### Usage
 
