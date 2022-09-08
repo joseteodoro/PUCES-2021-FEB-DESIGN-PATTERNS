@@ -47,3 +47,11 @@ A pattern to help with progressive rollouts with no downtime:
 [GoF - Design patterns](https://www.amazon.com.br/Padr%C3%B5es-Projetos-Solu%C3%A7%C3%B5es-Reutiliz%C3%A1veis-Orientados/dp/8573076100)
 
 [Clean Code](https://www.amazon.com.br/dp/B001GSTOAM)
+
+[Introdução a concorrência com Node.js](https://medium.com/@jteodoro/introdu%C3%A7%C3%A3o-a-concorr%C3%AAncia-com-node-js-cb9e27aae56)
+
+[Mecanismos de sincronização no Nodejs](https://medium.com/@jteodoro/mecanismos-de-sincroniza%C3%A7%C3%A3o-no-nodejs-d32e40cb39f4)
+
+[Princípios de design de programação](https://medium.com/@jteodoro/princ%C3%ADpios-de-design-de-programa%C3%A7%C3%A3o-b59ca31ebee)
+
+[Honre os contratos que você expõe](https://medium.com/@jteodoro/honre-os-contratos-que-voc%C3%AA-exp%C3%B5e-c1acdddeabcf)
