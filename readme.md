@@ -2,6 +2,10 @@
 
 # Design patterns e Frameworks
 
+What do we need? Why good practices, letters, concepts, guidelines?
+
+We only need a better way to work, growth, keep and maintain our code.
+
 ## Context
 
 First of all, what is a pattern? Recurrent solutions for recurrent problems
