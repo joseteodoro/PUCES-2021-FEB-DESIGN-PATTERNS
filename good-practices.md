@@ -220,7 +220,7 @@ public class MouseMoveDemo implements MouseMoveListener {
 }
 ```
 
-### Dependency Inversion Principle:
+### Dependency Injection Principle:
 
 Related with encapsulation and abstractions;
 
